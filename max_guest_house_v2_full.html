@@ -1,0 +1,1224 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+:root{
+  --bg:#0b0f1c;--bg2:#121828;--bg3:#1a2235;--card:#1e2a3a;--card2:#243047;
+  --accent:#f59e0b;--accent2:#fbbf24;--blue:#3b82f6;--green:#22c55e;
+  --red:#ef4444;--purple:#a855f7;--teal:#14b8a6;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);
+  --text:#f1f5f9;--muted:#94a3b8;--muted2:#64748b;
+  --sidebar-w:220px;--topbar-h:56px;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{font-size:15px}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;overflow-x:hidden}
+
+/* ===== LAYOUT ===== */
+.app{display:flex;min-height:100vh}
+.sidebar{width:var(--sidebar-w);background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;z-index:200;transition:transform .25s ease;overflow-y:auto}
+.main{margin-left:var(--sidebar-w);flex:1;min-height:100vh;display:flex;flex-direction:column}
+.topbar{background:var(--bg2);border-bottom:1px solid var(--border);height:var(--topbar-h);padding:0 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.content{padding:16px;flex:1;max-width:1400px;width:100%}
+
+/* ===== MOBILE ===== */
+.hamburger{display:none;background:none;border:none;color:var(--text);font-size:22px;cursor:pointer;padding:6px}
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:199}
+
+@media(max-width:768px){
+  .sidebar{transform:translateX(-100%)}
+  .sidebar.open{transform:translateX(0)}
+  .sidebar-overlay.open{display:block}
+  .main{margin-left:0}
+  .hamburger{display:flex;align-items:center}
+  .content{padding:12px}
+  .stats-grid{grid-template-columns:repeat(2,1fr)!important;gap:10px!important}
+  .grid2{grid-template-columns:1fr!important}
+  .grid3{grid-template-columns:1fr!important}
+  .apt-grid{grid-template-columns:1fr!important}
+  .form-grid{grid-template-columns:1fr!important}
+  .modal{width:95vw!important;padding:16px!important;max-height:90vh}
+  .hide-mobile{display:none!important}
+  table{font-size:12px}
+  th,td{padding:8px 10px}
+  .topbar-right{gap:8px!important}
+}
+@media(min-width:769px) and (max-width:1024px){
+  :root{--sidebar-w:60px}
+  .nav-label,.nav-text{display:none}
+  .nav-item{justify-content:center;padding:12px}
+  .nav-item i{width:auto;font-size:20px}
+  .logo-text{display:none}
+  .logo{justify-content:center;padding:16px}
+  .stats-grid{grid-template-columns:repeat(2,1fr)!important}
+}
+
+/* ===== SIDEBAR ===== */
+.logo{padding:16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.logo-icon{width:36px;height:36px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.logo-text{display:flex;flex-direction:column}
+.logo-title{font-size:13px;font-weight:700;color:var(--accent);line-height:1.2}
+.logo-sub{font-size:10px;color:var(--muted)}
+.nav-section{padding:6px 0}
+.nav-label{font-size:9px;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:1.2px;padding:8px 14px 3px}
+.nav-item{display:flex;align-items:center;gap:9px;padding:9px 12px;cursor:pointer;border-radius:8px;margin:1px 6px;font-size:12.5px;color:var(--muted);transition:.15s;border:none;background:none;width:calc(100% - 12px);text-align:left;position:relative}
+.nav-item:hover{background:var(--bg3);color:var(--text)}
+.nav-item.active{background:rgba(245,158,11,.15);color:var(--accent)}
+.nav-item i{font-size:17px;width:18px;flex-shrink:0}
+.nav-badge{background:var(--accent);color:#000;font-size:9px;font-weight:700;padding:1px 5px;border-radius:10px;margin-left:auto}
+.nav-badge.red{background:var(--red);color:#fff}
+.sidebar-footer{padding:12px;border-top:1px solid var(--border);margin-top:auto}
+.contact-info{font-size:11px;color:var(--muted);line-height:1.8}
+
+/* ===== TOPBAR ===== */
+.page-title{font-weight:600;font-size:15px}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.date-chip{font-size:11px;color:var(--muted);background:var(--bg3);padding:4px 10px;border-radius:20px}
+.notif-btn{position:relative;background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;padding:4px}
+.notif-dot{position:absolute;top:2px;right:2px;width:8px;height:8px;background:var(--red);border-radius:50%;border:2px solid var(--bg2)}
+
+/* ===== STATS ===== */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px;position:relative;overflow:hidden}
+.stat-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px}
+.stat-card.y::after{background:var(--accent)}.stat-card.b::after{background:var(--blue)}.stat-card.g::after{background:var(--green)}.stat-card.r::after{background:var(--red)}.stat-card.p::after{background:var(--purple)}.stat-card.t::after{background:var(--teal)}
+.stat-ico{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;margin-bottom:10px;font-size:18px}
+.stat-ico.y{background:rgba(245,158,11,.15);color:var(--accent)}.stat-ico.b{background:rgba(59,130,246,.15);color:var(--blue)}.stat-ico.g{background:rgba(34,197,94,.15);color:var(--green)}.stat-ico.r{background:rgba(239,68,68,.15);color:var(--red)}.stat-ico.p{background:rgba(168,85,247,.15);color:var(--purple)}.stat-ico.t{background:rgba(20,184,166,.15);color:var(--teal)}
+.stat-val{font-size:24px;font-weight:700;line-height:1}.stat-lbl{font-size:11px;color:var(--muted);margin-top:3px}
+
+/* ===== CARDS ===== */
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px}
+.card-sm{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:12px}
+.section-wrap{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px}
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.sec-title{font-size:14px;font-weight:600;display:flex;align-items:center;gap:7px}
+.sec-title i{color:var(--accent);font-size:16px}
+
+/* ===== APPARTEMENTS ===== */
+.apt-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+.apt-card{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;cursor:pointer;transition:.2s}
+.apt-card:hover{border-color:var(--accent);transform:translateY(-2px)}
+.apt-hdr{padding:14px;background:var(--card2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.apt-body{padding:14px}
+.apt-row{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);margin-bottom:5px}
+.apt-row i{font-size:13px;flex-shrink:0}
+.status-pill{font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px}
+.s-libre{background:rgba(34,197,94,.15);color:var(--green)}.s-loue{background:rgba(239,68,68,.15);color:var(--red)}.s-menage{background:rgba(245,158,11,.15);color:var(--accent)}
+
+/* ===== TABLE ===== */
+.tbl-wrap{overflow-x:auto;border-radius:12px;border:1px solid var(--border)}
+table{width:100%;border-collapse:collapse;font-size:12.5px;min-width:500px}
+th{padding:10px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border);background:var(--card2);white-space:nowrap}
+td{padding:9px 12px;border-bottom:1px solid rgba(255,255,255,.03);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(255,255,255,.02)}
+
+/* ===== BUTTONS ===== */
+.btn{border:none;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:.15s;font-family:inherit;white-space:nowrap}
+.btn-primary{background:var(--accent);color:#000}.btn-primary:hover{background:var(--accent2)}
+.btn-ghost{background:var(--bg3);color:var(--text);border:1px solid var(--border)}.btn-ghost:hover{border-color:var(--accent);color:var(--accent)}
+.btn-danger{background:rgba(239,68,68,.12);color:var(--red);border:1px solid rgba(239,68,68,.25)}
+.btn-green{background:rgba(34,197,94,.12);color:var(--green);border:1px solid rgba(34,197,94,.25)}
+.btn-wa{background:#25D366;color:#fff}.btn-wa:hover{background:#1ebe5d}
+.btn-sm{padding:5px 10px;font-size:11px}
+.btn-icon{width:32px;height:32px;padding:0;justify-content:center}
+
+/* ===== CHIPS ===== */
+.chip{display:inline-flex;align-items:center;gap:3px;font-size:10px;padding:3px 7px;border-radius:20px;font-weight:600;white-space:nowrap}
+.c-blue{background:rgba(59,130,246,.15);color:#60a5fa}.c-green{background:rgba(34,197,94,.15);color:#4ade80}.c-red{background:rgba(239,68,68,.15);color:#f87171}.c-orange{background:rgba(245,158,11,.15);color:#fbbf24}.c-purple{background:rgba(168,85,247,.15);color:#c084fc}.c-teal{background:rgba(20,184,166,.15);color:#2dd4bf}
+
+/* ===== FORM ===== */
+label{font-size:11px;color:var(--muted);display:block;margin-bottom:4px;font-weight:500}
+input,select,textarea{background:var(--bg3);border:1px solid var(--border2);color:var(--text);border-radius:8px;padding:8px 11px;font-size:13px;width:100%;outline:none;font-family:inherit;transition:.15s}
+input:focus,select:focus,textarea:focus{border-color:var(--accent)}
+select option{background:var(--bg2)}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-group{margin-bottom:12px}
+
+/* ===== ALERTS ===== */
+.alert{border-radius:8px;padding:10px 12px;margin-bottom:8px;display:flex;align-items:flex-start;gap:9px;font-size:12px;line-height:1.4}
+.al-warn{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25)}
+.al-danger{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25)}
+.al-info{background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.25)}
+.al-green{background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.25)}
+.al-purple{background:rgba(168,85,247,.08);border:1px solid rgba(168,85,247,.25)}
+
+/* ===== PROGRESS ===== */
+.progress-bar{height:5px;background:rgba(255,255,255,.07);border-radius:3px;overflow:hidden}
+.progress-fill{height:100%;border-radius:3px;transition:.4s}
+.credit-bar{height:6px;background:rgba(255,255,255,.07);border-radius:3px;overflow:hidden;margin:5px 0}
+.credit-fill{height:100%;border-radius:3px}
+
+/* ===== INVENTORY ===== */
+.inv-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px}
+.inv-item{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px 10px;display:flex;align-items:center;gap:7px;cursor:pointer;transition:.15s}
+.inv-item:hover{border-color:var(--border2)}
+.inv-item.ok{border-color:rgba(34,197,94,.3)}.inv-item.nok{border-color:rgba(239,68,68,.3)}
+.inv-item.ok i{color:var(--green)}.inv-item.nok i{color:var(--red)}
+.inv-item i{font-size:16px;flex-shrink:0}
+
+/* ===== CLEAN ===== */
+.clean-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:7px}
+.clean-item{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:9px;cursor:pointer;transition:.15s;display:flex;align-items:center;gap:7px;font-size:12px}
+.clean-item:hover{border-color:var(--border2)}
+.clean-item.done{border-color:rgba(34,197,94,.35);background:rgba(34,197,94,.05)}
+.ci-dot{width:9px;height:9px;border-radius:50%;background:var(--muted2);flex-shrink:0;transition:.3s}
+.clean-item.done .ci-dot{background:var(--green)}
+
+/* ===== MAINTENANCE ===== */
+.maint-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px;transition:.2s}
+.maint-card:hover{border-color:var(--border2)}
+.maint-card.urgent{border-color:rgba(239,68,68,.35)}
+.maint-card.warn{border-color:rgba(245,158,11,.35)}
+.maint-card.ok{border-color:rgba(34,197,94,.25)}
+.priority-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.p-high{background:var(--red)}.p-med{background:var(--accent)}.p-low{background:var(--green)}
+
+/* ===== TECHNICIANS ===== */
+.tech-card{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:12px;display:flex;align-items:center;gap:12px}
+.tech-avatar{width:38px;height:38px;border-radius:50%;background:var(--teal);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+
+/* ===== STATS CHART ===== */
+.bar-chart{display:flex;align-items:flex-end;gap:6px;height:100px;padding-top:8px}
+.bar-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
+.bar{width:100%;border-radius:4px 4px 0 0;min-height:4px;transition:.6s}
+.bar-lbl{font-size:9px;color:var(--muted);text-align:center}
+.bar-val{font-size:9px;font-weight:700;color:var(--text)}
+
+/* ===== MODAL ===== */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:1000;align-items:flex-end;justify-content:center;padding:0}
+.modal-bg.open{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:16px 16px 0 0;padding:20px;width:100%;max-height:92vh;overflow-y:auto}
+@media(min-width:640px){
+  .modal-bg{align-items:center;padding:16px}
+  .modal{border-radius:16px;width:580px;max-width:95vw}
+}
+@media(min-width:900px){.modal{width:640px}}
+.modal-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.modal-title{font-size:16px;font-weight:700;display:flex;align-items:center;gap:8px}
+.close-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:20px;padding:4px;border-radius:6px}
+.close-btn:hover{color:var(--text);background:var(--bg3)}
+
+/* ===== TABS ===== */
+.tabs{display:flex;gap:3px;background:var(--bg3);border-radius:10px;padding:3px;margin-bottom:16px;overflow-x:auto}
+.tab{flex:1;padding:6px 10px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;text-align:center;color:var(--muted);background:none;border:none;font-family:inherit;transition:.15s;white-space:nowrap;min-width:fit-content}
+.tab.active{background:var(--card2);color:var(--text)}
+
+/* ===== AVATAR ===== */
+.avatar{width:32px;height:32px;border-radius:50%;background:var(--accent);color:#000;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0}
+
+/* ===== PHOTO UPLOAD ===== */
+.photo-box{border:2px dashed var(--border2);border-radius:10px;padding:16px;text-align:center;cursor:pointer;transition:.2s;color:var(--muted);font-size:12px}
+.photo-box:hover{border-color:var(--accent);color:var(--accent)}
+
+/* ===== TIMELINE ===== */
+.timeline{padding-left:20px;position:relative}
+.timeline::before{content:'';position:absolute;left:5px;top:4px;bottom:4px;width:1px;background:var(--border)}
+.tl-item{position:relative;margin-bottom:12px;font-size:12px}
+.tl-dot{position:absolute;left:-17px;top:3px;width:9px;height:9px;border-radius:50%;background:var(--accent)}
+.tl-date{color:var(--muted2);font-size:10px;margin-bottom:2px}
+
+/* ===== STARS ===== */
+.stars{display:flex;gap:2px}
+.star{font-size:15px;cursor:pointer;color:var(--muted2)}
+.star.on{color:var(--accent)}
+
+/* ===== DOT LIVE ===== */
+.dot-live{width:6px;height:6px;background:var(--green);border-radius:50%;animation:blink 1.8s infinite;flex-shrink:0}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+
+/* ===== WA PREVIEW ===== */
+.wa-preview{background:#0a1f16;border:1px solid #25D36633;border-radius:10px;padding:12px;font-size:12px}
+.wa-bubble{background:#1f4e32;border-radius:0 12px 12px 12px;padding:10px 12px;display:inline-block;max-width:85%;line-height:1.5;color:#e8f5e9;font-size:12px;margin-top:6px}
+
+/* ===== SCROLL ===== */
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:2px}
+
+/* ===== PAGES ===== */
+.page{display:none}.page.active{display:block}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+
+.divider{height:1px;background:var(--border);margin:12px 0}
+.empty{text-align:center;padding:36px;color:var(--muted)}
+.empty i{font-size:36px;display:block;margin-bottom:10px;opacity:.3}
+.badge-nb{background:var(--bg3);color:var(--muted);font-size:10px;padding:2px 7px;border-radius:10px;border:1px solid var(--border)}
+
+/* WhatsApp log */
+.wa-log-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);font-size:12px}
+.wa-log-item:last-child{border-bottom:none}
+.wa-time{font-size:10px;color:var(--muted2);white-space:nowrap}
+.sent-badge{background:rgba(37,211,102,.15);color:#25D366;font-size:10px;padding:2px 6px;border-radius:10px;font-weight:600;white-space:nowrap}
+</style>
+</head>
+<body>
+
+<div class="sidebar-overlay" id="overlay" onclick="closeSidebar()"></div>
+
+<div class="app">
+<!-- ===== SIDEBAR ===== -->
+<div class="sidebar" id="sidebar">
+  <div class="logo">
+    <div class="logo-icon">🏠</div>
+    <div class="logo-text">
+      <div class="logo-title">MAX GUEST HOUSE</div>
+      <div class="logo-sub">Gestion meublés</div>
+    </div>
+  </div>
+  <nav style="flex:1;padding:6px 0">
+    <div class="nav-section">
+      <div class="nav-label">Principal</div>
+      <button class="nav-item active" onclick="goPage('dashboard')"><i class="ti ti-layout-dashboard"></i><span class="nav-text">Tableau de bord</span></button>
+      <button class="nav-item" onclick="goPage('apartments')"><i class="ti ti-building"></i><span class="nav-text">Appartements</span><span class="nav-badge">6</span></button>
+      <button class="nav-item" onclick="goPage('clients')"><i class="ti ti-users"></i><span class="nav-text">Clients</span></button>
+      <button class="nav-item" onclick="goPage('locations')"><i class="ti ti-calendar"></i><span class="nav-text">Locations</span></button>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Contrôle</div>
+      <button class="nav-item" onclick="goPage('inventaire')"><i class="ti ti-clipboard-list"></i><span class="nav-text">Inventaire</span></button>
+      <button class="nav-item" onclick="goPage('proprete')"><i class="ti ti-sparkles"></i><span class="nav-text">Propreté</span></button>
+      <button class="nav-item" onclick="goPage('energie')"><i class="ti ti-bolt"></i><span class="nav-text">Énergie & Canal+</span><span class="nav-badge red" id="en-badge">2</span></button>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Maintenance</div>
+      <button class="nav-item" onclick="goPage('maintenance')"><i class="ti ti-tool"></i><span class="nav-text">Maintenances</span><span class="nav-badge red" id="maint-badge">3</span></button>
+      <button class="nav-item" onclick="goPage('techniciens')"><i class="ti ti-users-group"></i><span class="nav-text">Techniciens</span></button>
+      <button class="nav-item" onclick="goPage('stats')"><i class="ti ti-chart-bar"></i><span class="nav-text">Statistiques</span></button>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">WhatsApp</div>
+      <button class="nav-item" onclick="goPage('whatsapp')"><i class="ti ti-brand-whatsapp"></i><span class="nav-text">Alertes & Logs</span><span class="nav-badge" id="wa-badge">5</span></button>
+    </div>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="contact-info">
+      <div><i class="ti ti-phone" style="font-size:11px"></i> 0196381777</div>
+      <div style="color:#25D366"><i class="ti ti-brand-whatsapp" style="font-size:11px"></i> 0196381777</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MAIN ===== -->
+<div class="main">
+<div class="topbar">
+  <div style="display:flex;align-items:center;gap:10px">
+    <button class="hamburger" onclick="toggleSidebar()"><i class="ti ti-menu-2"></i></button>
+    <div class="dot-live"></div>
+    <span class="page-title" id="page-title">Tableau de bord</span>
+  </div>
+  <div class="topbar-right" style="display:flex;align-items:center;gap:10px">
+    <span class="date-chip hide-mobile" id="date-now"></span>
+    <button class="notif-btn" onclick="goPage('whatsapp')"><i class="ti ti-bell"></i><div class="notif-dot"></div></button>
+    <button class="btn btn-primary btn-sm" onclick="showQuickAdd()"><i class="ti ti-plus"></i><span class="hide-mobile">Nouveau</span></button>
+  </div>
+</div>
+
+<div class="content">
+
+<!-- ===== DASHBOARD ===== -->
+<div class="page active" id="page-dashboard">
+  <div class="stats-grid">
+    <div class="stat-card y"><div class="stat-ico y"><i class="ti ti-building"></i></div><div class="stat-val">6</div><div class="stat-lbl">Appartements</div></div>
+    <div class="stat-card g"><div class="stat-ico g"><i class="ti ti-home-check"></i></div><div class="stat-val" id="s-loue">3</div><div class="stat-lbl">Loués</div></div>
+    <div class="stat-card b"><div class="stat-ico b"><i class="ti ti-users"></i></div><div class="stat-val" id="s-clients">5</div><div class="stat-lbl">Clients</div></div>
+    <div class="stat-card r"><div class="stat-ico r"><i class="ti ti-alert-triangle"></i></div><div class="stat-val" id="s-alerts">5</div><div class="stat-lbl">Alertes</div></div>
+  </div>
+  <div class="grid2" style="margin-bottom:14px">
+    <div class="section-wrap">
+      <div class="sec-hdr"><div class="sec-title"><i class="ti ti-alert-circle"></i>Alertes actives</div><span class="badge-nb" id="alert-count">5</span></div>
+      <div id="alert-list"></div>
+    </div>
+    <div class="section-wrap">
+      <div class="sec-hdr"><div class="sec-title"><i class="ti ti-chart-bar"></i>Occupation</div></div>
+      <div id="occ-list"></div>
+    </div>
+  </div>
+  <div class="grid2">
+    <div class="section-wrap">
+      <div class="sec-hdr"><div class="sec-title"><i class="ti ti-bolt"></i>SBEE — Crédit</div></div>
+      <div id="sbee-dash"></div>
+    </div>
+    <div class="section-wrap">
+      <div class="sec-hdr"><div class="sec-title"><i class="ti ti-tool"></i>Maintenances urgentes</div><button class="btn btn-ghost btn-sm" onclick="goPage('maintenance')">Voir tout</button></div>
+      <div id="maint-dash"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== APPARTEMENTS ===== -->
+<div class="page" id="page-apartments">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+    <div class="sec-title" style="margin:0"><i class="ti ti-building"></i>Appartements</div>
+    <button class="btn btn-primary" onclick="openModal('modal-add-apt')"><i class="ti ti-plus"></i>Ajouter</button>
+  </div>
+  <div class="apt-grid" id="apt-grid"></div>
+</div>
+
+<!-- ===== CLIENTS ===== -->
+<div class="page" id="page-clients">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+    <div class="sec-title" style="margin:0"><i class="ti ti-users"></i>Clients</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <input type="text" placeholder="Rechercher..." id="cl-search" oninput="renderClients()" style="width:160px">
+      <button class="btn btn-primary" onclick="openModal('modal-add-client')"><i class="ti ti-user-plus"></i>Nouveau</button>
+    </div>
+  </div>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>Client</th><th>WhatsApp</th><th class="hide-mobile">Note</th><th>Éval.</th><th>Actions</th></tr></thead>
+    <tbody id="cl-tbody"></tbody>
+  </table></div>
+</div>
+
+<!-- ===== LOCATIONS ===== -->
+<div class="page" id="page-locations">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+    <div class="sec-title" style="margin:0"><i class="ti ti-calendar"></i>Locations</div>
+    <button class="btn btn-primary" onclick="openModal('modal-add-location')"><i class="ti ti-plus"></i>Nouvelle</button>
+  </div>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>Appartement</th><th>Client</th><th class="hide-mobile">Entrée</th><th>Sortie</th><th>Statut</th><th>Actions</th></tr></thead>
+    <tbody id="loc-tbody"></tbody>
+  </table></div>
+</div>
+
+<!-- ===== INVENTAIRE ===== -->
+<div class="page" id="page-inventaire">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+    <div class="sec-title" style="margin:0"><i class="ti ti-clipboard-list"></i>Inventaire</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <select id="inv-apt-f" onchange="renderInventaire()" style="width:auto"><option value="">Tous</option></select>
+      <select id="inv-type-f" onchange="renderInventaire()" style="width:auto"><option value="">Entrée+Sortie</option><option value="entree">Entrée</option><option value="sortie">Sortie</option></select>
+    </div>
+  </div>
+  <div id="inv-content"></div>
+</div>
+
+<!-- ===== PROPRETE ===== -->
+<div class="page" id="page-proprete">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+    <div class="sec-title" style="margin:0"><i class="ti ti-sparkles"></i>Propreté</div>
+    <select id="prop-apt-f" onchange="renderProprete()" style="width:auto"><option value="">Tous</option></select>
+  </div>
+  <div id="prop-content"></div>
+</div>
+
+<!-- ===== ENERGIE ===== -->
+<div class="page" id="page-energie">
+  <div class="sec-title" style="margin-bottom:14px"><i class="ti ti-bolt"></i>Énergie & Abonnements</div>
+  <div class="tabs" style="max-width:380px"><button class="tab active" onclick="enTab('sbee',this)">⚡ SBEE</button><button class="tab" onclick="enTab('canal',this)">📺 Canal+</button></div>
+  <div id="en-sbee-wrap"></div>
+  <div id="en-canal-wrap" style="display:none"></div>
+</div>
+
+<!-- ===== MAINTENANCE ===== -->
+<div class="page" id="page-maintenance">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+    <div class="sec-title" style="margin:0"><i class="ti ti-tool"></i>Maintenances</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <select id="maint-f" onchange="renderMaintenance()" style="width:auto"><option value="">Toutes</option><option value="urgent">Urgent</option><option value="planifie">Planifié</option><option value="done">Terminé</option></select>
+      <button class="btn btn-primary" onclick="openModal('modal-add-maint')"><i class="ti ti-plus"></i>Nouvelle</button>
+    </div>
+  </div>
+  <div id="maint-content"></div>
+</div>
+
+<!-- ===== TECHNICIENS ===== -->
+<div class="page" id="page-techniciens">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+    <div class="sec-title" style="margin:0"><i class="ti ti-users-group"></i>Techniciens</div>
+    <button class="btn btn-primary" onclick="openModal('modal-add-tech')"><i class="ti ti-plus"></i>Ajouter</button>
+  </div>
+  <div class="grid3" id="tech-grid"></div>
+</div>
+
+<!-- ===== STATS ===== -->
+<div class="page" id="page-stats">
+  <div class="sec-title" style="margin-bottom:16px"><i class="ti ti-chart-bar"></i>Statistiques & Finances</div>
+  <div class="stats-grid" style="margin-bottom:16px">
+    <div class="stat-card g"><div class="stat-ico g"><i class="ti ti-coin"></i></div><div class="stat-val">1.65M</div><div class="stat-lbl">Revenus (FCFA)</div></div>
+    <div class="stat-card r"><div class="stat-ico r"><i class="ti ti-tool"></i></div><div class="stat-val" id="stat-maint-total">245K</div><div class="stat-lbl">Dépenses maintenance</div></div>
+    <div class="stat-card y"><div class="stat-ico y"><i class="ti ti-home-check"></i></div><div class="stat-val">78%</div><div class="stat-lbl">Taux occupation</div></div>
+    <div class="stat-card p"><div class="stat-ico p"><i class="ti ti-bolt"></i></div><div class="stat-val">42K</div><div class="stat-lbl">SBEE + Canal (FCFA)</div></div>
+  </div>
+  <div class="grid2">
+    <div class="section-wrap">
+      <div class="sec-hdr"><div class="sec-title"><i class="ti ti-chart-bar"></i>Dépenses maintenance / mois</div></div>
+      <div id="chart-maint"></div>
+    </div>
+    <div class="section-wrap">
+      <div class="sec-hdr"><div class="sec-title"><i class="ti ti-chart-pie"></i>Répartition des dépenses</div></div>
+      <div id="chart-cat"></div>
+    </div>
+  </div>
+  <div class="section-wrap">
+    <div class="sec-hdr"><div class="sec-title"><i class="ti ti-list"></i>Historique des dépenses</div></div>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Date</th><th>Appartement</th><th>Type</th><th>Description</th><th>Montant</th><th>Technicien</th></tr></thead>
+      <tbody id="depenses-tbody"></tbody>
+    </table></div>
+  </div>
+</div>
+
+<!-- ===== WHATSAPP ===== -->
+<div class="page" id="page-whatsapp">
+  <div class="sec-title" style="margin-bottom:16px"><i class="ti ti-brand-whatsapp" style="color:#25D366"></i>Centre d'alertes WhatsApp</div>
+  <div class="grid2" style="margin-bottom:14px">
+    <div class="section-wrap">
+      <div class="sec-hdr"><div class="sec-title"><i class="ti ti-settings"></i>Configuration</div></div>
+      <div class="form-group"><label>Numéro propriétaire (WhatsApp)</label><input type="text" id="wa-owner" value="+22901963811777" placeholder="+229XXXXXXXX"></div>
+      <div class="form-group"><label>Seuil alerte SBEE (kWh)</label><input type="number" id="wa-sbee-seuil" value="5" min="1"></div>
+      <div class="form-group"><label>Alerte Canal+ (jours avant expiration)</label><input type="number" id="wa-canal-seuil" value="7" min="1"></div>
+      <div class="form-group"><label>Rappel maintenance (toutes les X heures)</label><input type="number" id="wa-maint-freq" value="48" min="1"></div>
+      <button class="btn btn-wa" onclick="saveWaConfig()"><i class="ti ti-check"></i>Enregistrer config</button>
+    </div>
+    <div class="section-wrap">
+      <div class="sec-hdr"><div class="sec-title"><i class="ti ti-send"></i>Envoyer alerte manuelle</div></div>
+      <div class="form-group"><label>Destinataire</label>
+        <select id="wa-dest"><option value="owner">Propriétaire</option></select>
+      </div>
+      <div class="form-group"><label>Type d'alerte</label>
+        <select id="wa-type" onchange="previewWaMsg()">
+          <option value="sbee">⚡ SBEE — Crédit faible</option>
+          <option value="canal7">📺 Canal+ — Expire dans 7 jours</option>
+          <option value="canal2">📺 Canal+ — Expire dans 2 jours (relance)</option>
+          <option value="maint">🔧 Rappel maintenance</option>
+          <option value="libre">🏠 Appartement libre</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Appartement</label>
+        <select id="wa-apt" onchange="previewWaMsg()"></select>
+      </div>
+      <div style="margin-bottom:12px">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px">Aperçu du message :</div>
+        <div class="wa-preview"><div style="font-size:10px;color:#4ade80;margin-bottom:4px">📱 WhatsApp — MAX GUEST HOUSE</div><div class="wa-bubble" id="wa-preview-text">Sélectionnez un type d'alerte</div></div>
+      </div>
+      <button class="btn btn-wa" onclick="sendWaAlert()"><i class="ti ti-brand-whatsapp"></i>Envoyer via WhatsApp</button>
+    </div>
+  </div>
+  <div class="section-wrap">
+    <div class="sec-hdr"><div class="sec-title"><i class="ti ti-history"></i>Journal des alertes envoyées</div><span class="badge-nb" id="wa-log-count">0</span></div>
+    <div id="wa-log-list"></div>
+  </div>
+</div>
+
+</div><!-- /content -->
+</div><!-- /main -->
+</div><!-- /app -->
+
+<!-- ===== MODALS ===== -->
+
+<!-- Modal Appartement -->
+<div class="modal-bg" id="modal-add-apt">
+  <div class="modal">
+    <div class="modal-hdr"><div class="modal-title">🏠 Appartement</div><button class="close-btn" onclick="closeModal('modal-add-apt')"><i class="ti ti-x"></i></button></div>
+    <input type="hidden" id="apt-edit-id" value="">
+    <div class="form-grid">
+      <div class="form-group"><label>Nom / Numéro</label><input id="apt-nom" placeholder="Appartement N°7"></div>
+      <div class="form-group"><label>Étage</label><input id="apt-etage" placeholder="RDC, 1er étage..."></div>
+      <div class="form-group"><label>N° Compteur SBEE</label><input id="apt-sbee" placeholder="SB-XXXXXXXX"></div>
+      <div class="form-group"><label>Crédit SBEE (kWh)</label><input type="number" id="apt-sbee-cr" placeholder="50" min="0"></div>
+      <div class="form-group"><label>N° Décodeur Canal+</label><input id="apt-canal" placeholder="CAL-00X"></div>
+      <div class="form-group"><label>Expiration Canal+</label><input type="date" id="apt-canal-exp"></div>
+      <div class="form-group"><label>Prix / nuit (FCFA)</label><input type="number" id="apt-prix" placeholder="15000"></div>
+      <div class="form-group"><label>Statut</label><select id="apt-statut"><option value="libre">Libre</option><option value="loue">Loué</option><option value="menage">En ménage</option></select></div>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn btn-ghost" onclick="closeModal('modal-add-apt')">Annuler</button>
+      <button class="btn btn-primary" onclick="saveApt()"><i class="ti ti-check"></i>Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Client -->
+<div class="modal-bg" id="modal-add-client">
+  <div class="modal">
+    <div class="modal-hdr"><div class="modal-title">👤 Nouveau client</div><button class="close-btn" onclick="closeModal('modal-add-client')"><i class="ti ti-x"></i></button></div>
+    <div class="form-grid">
+      <div class="form-group"><label>Nom complet</label><input id="cl-nom" placeholder="Prénom NOM"></div>
+      <div class="form-group"><label>N° WhatsApp</label><input id="cl-wa" placeholder="+229 9X000000"></div>
+    </div>
+    <div class="form-grid">
+      <div class="form-group"><label>📷 Pièce d'identité</label>
+        <div class="photo-box" onclick="this.querySelector('input').click()"><i class="ti ti-id" style="font-size:22px;display:block;margin-bottom:4px"></i>Importer photo<input type="file" accept="image/*" style="display:none" onchange="showPrev(this,'prev-id')"><img id="prev-id" style="max-width:100%;border-radius:6px;margin-top:6px;display:none"></div>
+      </div>
+      <div class="form-group"><label>🤳 Selfie client</label>
+        <div class="photo-box" onclick="this.querySelector('input').click()"><i class="ti ti-camera" style="font-size:22px;display:block;margin-bottom:4px"></i>Importer selfie<input type="file" accept="image/*" style="display:none" onchange="showPrev(this,'prev-selfie')"><img id="prev-selfie" style="max-width:100%;border-radius:6px;margin-top:6px;display:none"></div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Évaluation</label>
+      <div class="stars" id="stars-inp" onclick="setStars(event)" style="margin-bottom:8px"><span class="star on" data-v="1">★</span><span class="star on" data-v="2">★</span><span class="star on" data-v="3">★</span><span class="star" data-v="4">★</span><span class="star" data-v="5">★</span></div>
+    </div>
+    <div class="form-group"><label>Note / Observations</label><textarea id="cl-note" rows="3" placeholder="Comportement, remarques..."></textarea></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn btn-ghost" onclick="closeModal('modal-add-client')">Annuler</button>
+      <button class="btn btn-primary" onclick="saveClient()"><i class="ti ti-check"></i>Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Location -->
+<div class="modal-bg" id="modal-add-location">
+  <div class="modal">
+    <div class="modal-hdr"><div class="modal-title">📋 Nouvelle location</div><button class="close-btn" onclick="closeModal('modal-add-location')"><i class="ti ti-x"></i></button></div>
+    <div class="form-grid">
+      <div class="form-group"><label>Appartement</label><select id="loc-apt"></select></div>
+      <div class="form-group"><label>Client</label><select id="loc-cl"></select></div>
+      <div class="form-group"><label>Date d'entrée</label><input type="date" id="loc-entree"></div>
+      <div class="form-group"><label>Date de sortie</label><input type="date" id="loc-sortie"></div>
+      <div class="form-group"><label>Prix total (FCFA)</label><input type="number" id="loc-prix"></div>
+      <div class="form-group"><label>Avance (FCFA)</label><input type="number" id="loc-avance"></div>
+    </div>
+    <div class="form-group"><label>Observations</label><textarea id="loc-obs" rows="2"></textarea></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn btn-ghost" onclick="closeModal('modal-add-location')">Annuler</button>
+      <button class="btn btn-primary" onclick="saveLocation()"><i class="ti ti-check"></i>Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Maintenance -->
+<div class="modal-bg" id="modal-add-maint">
+  <div class="modal">
+    <div class="modal-hdr"><div class="modal-title">🔧 Nouvelle maintenance</div><button class="close-btn" onclick="closeModal('modal-add-maint')"><i class="ti ti-x"></i></button></div>
+    <div class="form-grid">
+      <div class="form-group"><label>Appartement</label><select id="m-apt"></select></div>
+      <div class="form-group"><label>Technicien</label><select id="m-tech"><option value="">Non assigné</option></select></div>
+      <div class="form-group"><label>Type</label>
+        <select id="m-type"><option>Électricité</option><option>Plomberie</option><option>Climatisation</option><option>Peinture</option><option>Menuiserie</option><option>Électroménager</option><option>Serrurerie</option><option>Autre</option></select>
+      </div>
+      <div class="form-group"><label>Priorité</label>
+        <select id="m-prio"><option value="high">🔴 Urgent</option><option value="med">🟡 Moyen</option><option value="low">🟢 Faible</option></select>
+      </div>
+      <div class="form-group"><label>Date prévue</label><input type="date" id="m-date"></div>
+      <div class="form-group"><label>Coût estimé (FCFA)</label><input type="number" id="m-cout" placeholder="0"></div>
+    </div>
+    <div class="form-group"><label>Description</label><textarea id="m-desc" rows="3" placeholder="Détail du problème..."></textarea></div>
+    <div class="form-group">
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+        <input type="checkbox" id="m-rappel" checked style="width:auto"> Envoyer rappels WhatsApp toutes les 48h
+      </label>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn btn-ghost" onclick="closeModal('modal-add-maint')">Annuler</button>
+      <button class="btn btn-primary" onclick="saveMaint()"><i class="ti ti-check"></i>Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Technicien -->
+<div class="modal-bg" id="modal-add-tech">
+  <div class="modal">
+    <div class="modal-hdr"><div class="modal-title">👷 Nouveau technicien</div><button class="close-btn" onclick="closeModal('modal-add-tech')"><i class="ti ti-x"></i></button></div>
+    <div class="form-grid">
+      <div class="form-group"><label>Nom complet</label><input id="t-nom" placeholder="Prénom NOM"></div>
+      <div class="form-group"><label>N° WhatsApp</label><input id="t-wa" placeholder="+229 9X000000"></div>
+      <div class="form-group"><label>Spécialité</label>
+        <select id="t-spec"><option>Électricien</option><option>Plombier</option><option>Climaticien</option><option>Peintre</option><option>Menuisier</option><option>Technicien général</option></select>
+      </div>
+      <div class="form-group"><label>Tarif / intervention (FCFA)</label><input type="number" id="t-tarif" placeholder="5000"></div>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn btn-ghost" onclick="closeModal('modal-add-tech')">Annuler</button>
+      <button class="btn btn-primary" onclick="saveTech()"><i class="ti ti-check"></i>Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Détail Appartement -->
+<div class="modal-bg" id="modal-apt-detail">
+  <div class="modal" style="max-width:700px">
+    <div class="modal-hdr"><div class="modal-title" id="det-title">Appartement</div><button class="close-btn" onclick="closeModal('modal-apt-detail')"><i class="ti ti-x"></i></button></div>
+    <div class="tabs">
+      <button class="tab active" onclick="aptTab('at-inv',this)">📦 Inventaire</button>
+      <button class="tab" onclick="aptTab('at-prop',this)">🧹 Propreté</button>
+      <button class="tab" onclick="aptTab('at-en',this)">⚡ Énergie</button>
+      <button class="tab" onclick="aptTab('at-hist',this)">📋 Historique</button>
+    </div>
+    <div id="at-inv"></div>
+    <div id="at-prop" style="display:none"></div>
+    <div id="at-en" style="display:none"></div>
+    <div id="at-hist" style="display:none"></div>
+  </div>
+</div>
+
+<script>
+// ===== DATA =====
+let apartments=[
+  {id:1,nom:'Appartement N°1',etage:'RDC',statut:'loue',sbeeNum:'SB-0010234',sbeeCredit:45,canalNum:'CAL-001',canalExp:'2025-06-15',prix:12000,client:'Mme Adjoua Sènou'},
+  {id:2,nom:'Appartement N°2',etage:'1er étage',statut:'loue',sbeeNum:'SB-0010235',sbeeCredit:30,canalNum:'CAL-002',canalExp:'2025-06-03',prix:15000,client:'M. Koffi Adama'},
+  {id:3,nom:'Appartement N°3',etage:'1er étage',statut:'libre',sbeeNum:'SB-0010236',sbeeCredit:4,canalNum:'CAL-003',canalExp:'2025-07-20',prix:15000,client:null},
+  {id:4,nom:'Appartement N°4',etage:'2ème étage',statut:'menage',sbeeNum:'SB-0010237',sbeeCredit:80,canalNum:'CAL-004',canalExp:'2025-08-10',prix:20000,client:null},
+  {id:5,nom:'Appartement N°5',etage:'2ème étage',statut:'loue',sbeeNum:'SB-0010238',sbeeCredit:60,canalNum:'CAL-005',canalExp:'2025-05-30',prix:18000,client:'Mme Fatou Diallo'},
+  {id:6,nom:'Appartement N°6',etage:'3ème étage',statut:'libre',sbeeNum:'SB-0010239',sbeeCredit:95,canalNum:'CAL-006',canalExp:'2025-09-01',prix:22000,client:null},
+];
+let clients=[
+  {id:1,nom:'Mme Adjoua Sènou',wa:'+22997111222',note:'Cliente régulière, très propre',stars:5,statut:'actif'},
+  {id:2,nom:'M. Koffi Adama',wa:'+22996222333',note:'Paiement ponctuel',stars:4,statut:'actif'},
+  {id:3,nom:'Mme Fatou Diallo',wa:'+22995333444',note:'Première location',stars:3,statut:'actif'},
+  {id:4,nom:'M. Sékou Touré',wa:'+22994444555',note:'A causé des dégâts',stars:2,statut:'inactif'},
+  {id:5,nom:'Mme Aya Koné',wa:'+22993555666',note:'Excellent profil',stars:5,statut:'inactif'},
+];
+let locations=[
+  {id:1,aptId:1,clientId:1,entree:'2025-05-01',sortie:'2025-06-01',prix:360000,avance:180000,statut:'actif'},
+  {id:2,aptId:2,clientId:2,entree:'2025-04-15',sortie:'2025-06-03',prix:750000,avance:375000,statut:'actif'},
+  {id:3,aptId:5,clientId:3,entree:'2025-05-10',sortie:'2025-06-10',prix:540000,avance:270000,statut:'actif'},
+  {id:4,aptId:4,clientId:4,entree:'2025-03-01',sortie:'2025-04-01',prix:600000,avance:300000,statut:'terminé'},
+];
+let technicians=[
+  {id:1,nom:'Codjo Électrique',wa:'+22997800001',spec:'Électricien',tarif:5000},
+  {id:2,nom:'Aymar Plomberie',wa:'+22996800002',spec:'Plombier',tarif:7000},
+  {id:3,nom:'Francis Clima',wa:'+22995800003',spec:'Climaticien',tarif:10000},
+];
+let maintenances=[
+  {id:1,aptId:3,techId:1,type:'Électricité',prio:'high',date:'2025-05-28',cout:15000,desc:'Prise électrique défectueuse chambre',statut:'planifie',rappel:true},
+  {id:2,aptId:2,techId:2,type:'Plomberie',prio:'high',date:'2025-05-30',cout:20000,desc:'Fuite robinet douche',statut:'planifie',rappel:true},
+  {id:3,aptId:5,techId:null,type:'Peinture',prio:'med',date:'2025-06-05',cout:35000,desc:'Peinture salon à refaire',statut:'planifie',rappel:true},
+  {id:4,aptId:1,techId:3,type:'Climatisation',prio:'low',date:'2025-05-20',cout:12000,desc:'Entretien annuel clim',statut:'done',rappel:false},
+];
+let depenses=[
+  {id:1,date:'2025-05-20',aptId:1,type:'Climatisation',desc:'Entretien clim',montant:12000,techId:3},
+  {id:2,date:'2025-04-15',aptId:4,type:'Électricité',desc:'Remplacement disjoncteur',montant:8000,techId:1},
+  {id:3,date:'2025-04-02',aptId:2,type:'Plomberie',desc:'Réparation WC',montant:15000,techId:2},
+  {id:4,date:'2025-03-10',aptId:6,type:'Peinture',desc:'Peinture complète',montant:50000,techId:null},
+];
+let waLogs=[];
+let waConfig={ownerWa:'+22901963811777',sbeeSeuil:5,canalSeuil:7,maintFreq:48};
+let starsVal=3;
+let currentAptId=null;
+
+const equipements=['Télévision','Décodeur Canal+','Lit double','Lit simple','Réfrigérateur','Climatiseur','Ventilateur','Table + chaises','Armoire','Ustensiles cuisine','Bouilloire','Micro-ondes','Robinet douche','WC','Eau courante','Prises électriques','Ampoules','Rideaux'];
+const zonesNett=['Salon','Douche/WC','Terrasse','Réfrigérateur','Devanture','Serpière','Fenêtres','Plafond','Toile d\'araignée','Brasseur','Cuisine','Chambre'];
+let invData={},propData={};
+apartments.forEach(a=>{
+  invData[a.id]={entree:equipements.map(e=>({nom:e,ok:true})),sortie:equipements.map(e=>({nom:e,ok:true}))};
+  propData[a.id]={zones:zonesNett.map(z=>({nom:z,fait:Math.random()>.35}))};
+});
+
+// ===== SIDEBAR =====
+function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('overlay').classList.toggle('open');}
+function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('overlay').classList.remove('open');}
+
+// ===== PAGE NAV =====
+const pageTitles={dashboard:'Tableau de bord',apartments:'Appartements',clients:'Clients',locations:'Locations',inventaire:'Inventaire',proprete:'Propreté',energie:'Énergie & Canal+',maintenance:'Maintenances',techniciens:'Techniciens',stats:'Statistiques',whatsapp:'Alertes WhatsApp'};
+function goPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  document.querySelector(`[onclick="goPage('${id}')"]`).classList.add('active');
+  document.getElementById('page-title').textContent=pageTitles[id]||id;
+  closeSidebar();
+  if(id==='apartments') renderApts();
+  if(id==='clients') renderClients();
+  if(id==='locations') renderLocations();
+  if(id==='inventaire') renderInventaire();
+  if(id==='proprete') renderProprete();
+  if(id==='energie') renderEnergie();
+  if(id==='maintenance') renderMaintenance();
+  if(id==='techniciens') renderTechnicians();
+  if(id==='stats') renderStats();
+  if(id==='whatsapp') renderWaPage();
+}
+function showQuickAdd(){const p=document.querySelector('.page.active').id.replace('page-','');if(p==='apartments')openModal('modal-add-apt');else if(p==='clients')openModal('modal-add-client');else if(p==='maintenance')openModal('modal-add-maint');else if(p==='techniciens')openModal('modal-add-tech');else if(p==='locations')openModal('modal-add-location');else openModal('modal-add-apt');}
+
+// ===== DATE =====
+function fmtDate(){const d=new Date();return d.toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'});}
+document.getElementById('date-now').textContent=fmtDate();
+
+// ===== ALERTS =====
+function getAlerts(){
+  const al=[];
+  const now=new Date();
+  apartments.forEach(a=>{
+    if(a.sbeeCredit<=waConfig.sbeeSeuil) al.push({type:'danger',icon:'ti-bolt',msg:`<b>${a.nom}</b> — SBEE critique : ${a.sbeeCredit} kWh restants`,apt:a});
+    const diff=Math.ceil((new Date(a.canalExp)-now)/86400000);
+    if(diff<=2&&diff>0) al.push({type:'danger',icon:'ti-tv',msg:`<b>${a.nom}</b> — Canal+ expire dans ${diff} j ! Relance urgente`,apt:a});
+    else if(diff<=waConfig.canalSeuil&&diff>0) al.push({type:'warn',icon:'ti-tv',msg:`<b>${a.nom}</b> — Canal+ expire dans ${diff} jours (${a.canalExp})`,apt:a});
+    else if(diff<=0) al.push({type:'danger',icon:'ti-tv',msg:`<b>${a.nom}</b> — Canal+ EXPIRÉ ! Renouveler maintenant`,apt:a});
+  });
+  const urgMaint=maintenances.filter(m=>m.statut!=='done'&&m.prio==='high');
+  urgMaint.forEach(m=>{const a=apartments.find(x=>x.id===m.aptId);al.push({type:'warn',icon:'ti-tool',msg:`<b>${a?a.nom:'?'}</b> — ${m.type} urgent : ${m.desc}`});});
+  return al;
+}
+function renderDashboard(){
+  const alerts=getAlerts();
+  document.getElementById('s-loue').textContent=apartments.filter(a=>a.statut==='loue').length;
+  document.getElementById('s-clients').textContent=clients.length;
+  document.getElementById('s-alerts').textContent=alerts.length;
+  document.getElementById('alert-count').textContent=alerts.length;
+  document.getElementById('en-badge').textContent=apartments.filter(a=>{const d=Math.ceil((new Date(a.canalExp)-new Date())/86400000);return a.sbeeCredit<=waConfig.sbeeSeuil||d<=7;}).length;
+  document.getElementById('maint-badge').textContent=maintenances.filter(m=>m.statut!=='done').length;
+  document.getElementById('wa-badge').textContent=waLogs.length;
+  // Alerts list
+  let h=alerts.slice(0,6).map(al=>`<div class="alert al-${al.type==='danger'?'danger':'warn'}">
+    <i class="ti ${al.icon}" style="color:${al.type==='danger'?'var(--red)':'var(--accent)'}"></i>
+    <div>${al.msg}</div>
+  </div>`).join('');
+  document.getElementById('alert-list').innerHTML=h||'<div style="color:var(--green);font-size:12px;padding:8px"><i class="ti ti-check"></i> Aucune alerte</div>';
+  // Occupation
+  h='';
+  apartments.forEach(a=>{
+    const col={'libre':'var(--green)','loue':'var(--red)','menage':'var(--accent)'}[a.statut];
+    const pct={'libre':0,'loue':100,'menage':50}[a.statut];
+    const lbl={'libre':'Libre','loue':'Loué','menage':'Ménage'}[a.statut];
+    h+=`<div style="margin-bottom:9px"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px"><span style="font-weight:500">${a.nom}</span><span class="chip ${a.statut==='libre'?'c-green':a.statut==='loue'?'c-red':'c-orange'}">${lbl}</span></div><div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:${col}"></div></div></div>`;
+  });
+  document.getElementById('occ-list').innerHTML=h;
+  // SBEE dash
+  h='';
+  apartments.forEach(a=>{
+    const p=Math.min(100,a.sbeeCredit);const c=p<=5?'var(--red)':p<=20?'var(--accent)':'var(--green)';
+    h+=`<div style="margin-bottom:8px"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:2px"><span>${a.nom}</span><span style="color:${c};font-weight:700">${a.sbeeCredit} kWh</span></div><div class="credit-bar"><div class="credit-fill" style="width:${p}%;background:${c}"></div></div></div>`;
+  });
+  document.getElementById('sbee-dash').innerHTML=h;
+  // Maint urgent
+  const urg=maintenances.filter(m=>m.statut!=='done'&&m.prio==='high');
+  h=urg.slice(0,3).map(m=>{const a=apartments.find(x=>x.id===m.aptId);return`<div class="maint-card urgent" style="margin-bottom:8px"><div style="display:flex;align-items:center;gap:8px"><div class="priority-dot p-high"></div><div style="flex:1"><div style="font-size:12px;font-weight:600">${a?a.nom:'?'} — ${m.type}</div><div style="font-size:11px;color:var(--muted)">${m.desc}</div></div><span class="chip c-red">${m.date}</span></div></div>`;}).join('');
+  document.getElementById('maint-dash').innerHTML=h||'<div style="color:var(--green);font-size:12px;padding:8px"><i class="ti ti-check"></i> Pas de maintenance urgente</div>';
+}
+
+// ===== APPARTEMENTS =====
+function renderApts(){
+  const g=document.getElementById('apt-grid');
+  if(!g)return;
+  const labs={'loue':'Loué','libre':'Libre','menage':'Ménage'};
+  g.innerHTML=apartments.map(a=>`
+    <div class="apt-card" onclick="openAptDetail(${a.id})">
+      <div class="apt-hdr"><div><div style="font-weight:600;font-size:13px">${a.nom}</div><div style="font-size:11px;color:var(--muted)">${a.etage}</div></div><span class="status-pill s-${a.statut}">${labs[a.statut]}</span></div>
+      <div class="apt-body">
+        ${a.client?`<div class="apt-row"><i class="ti ti-user"></i><span>${a.client}</span></div>`:''}
+        <div class="apt-row"><i class="ti ti-bolt"></i><span>${a.sbeeNum} — <b>${a.sbeeCredit} kWh</b></span></div>
+        <div class="apt-row"><i class="ti ti-tv"></i><span>${a.canalNum} · ${a.canalExp}</span></div>
+        <div class="apt-row"><i class="ti ti-currency-dollar"></i><span>${a.prix.toLocaleString()} FCFA/nuit</span></div>
+        <div style="display:flex;gap:6px;margin-top:10px">
+          <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();editAptOpen(${a.id})"><i class="ti ti-edit"></i></button>
+          <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();openAptDetail(${a.id})"><i class="ti ti-eye"></i> Détail</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function editAptOpen(id){
+  const a=apartments.find(x=>x.id===id);if(!a)return;
+  document.getElementById('apt-edit-id').value=id;
+  document.getElementById('apt-nom').value=a.nom;
+  document.getElementById('apt-etage').value=a.etage;
+  document.getElementById('apt-sbee').value=a.sbeeNum;
+  document.getElementById('apt-sbee-cr').value=a.sbeeCredit;
+  document.getElementById('apt-canal').value=a.canalNum;
+  document.getElementById('apt-canal-exp').value=a.canalExp;
+  document.getElementById('apt-prix').value=a.prix;
+  document.getElementById('apt-statut').value=a.statut;
+  openModal('modal-add-apt');
+}
+function saveApt(){
+  const nom=document.getElementById('apt-nom').value.trim();if(!nom)return alert('Nom requis');
+  const editId=document.getElementById('apt-edit-id').value;
+  const obj={nom,etage:document.getElementById('apt-etage').value,statut:document.getElementById('apt-statut').value,sbeeNum:document.getElementById('apt-sbee').value,sbeeCredit:+document.getElementById('apt-sbee-cr').value||50,canalNum:document.getElementById('apt-canal').value,canalExp:document.getElementById('apt-canal-exp').value,prix:+document.getElementById('apt-prix').value||0,client:null};
+  if(editId){const idx=apartments.findIndex(x=>x.id==editId);if(idx>=0){apartments[idx]={...apartments[idx],...obj};}}
+  else{apartments.push({id:Date.now(),...obj});invData[apartments[apartments.length-1].id]={entree:equipements.map(e=>({nom:e,ok:true})),sortie:equipements.map(e=>({nom:e,ok:true}))};propData[apartments[apartments.length-1].id]={zones:zonesNett.map(z=>({nom:z,fait:false}))};}
+  closeModal('modal-add-apt');renderApts();renderDashboard();document.getElementById('apt-edit-id').value='';
+}
+
+// ===== APT DETAIL =====
+function openAptDetail(id){
+  const a=apartments.find(x=>x.id===id);if(!a)return;
+  currentAptId=id;
+  document.getElementById('det-title').textContent=a.nom+' — '+a.etage;
+  fillAptTabs(id);
+  openModal('modal-apt-detail');
+}
+function fillAptTabs(id){
+  const a=apartments.find(x=>x.id===id);if(!a)return;
+  // Inventaire
+  const inv=invData[id];
+  let ih=`<div style="margin-bottom:12px"><div style="font-size:12px;font-weight:600;color:var(--green);margin-bottom:8px">📥 État d'entrée</div><div class="inv-grid">`;
+  inv.entree.forEach((e,i)=>{ih+=`<div class="inv-item ${e.ok?'ok':'nok'}" onclick="toggleInv(${id},'entree',${i})"><i class="ti ${e.ok?'ti-circle-check':'ti-circle-x'}"></i><div><div style="font-size:11px;font-weight:500">${e.nom}</div><div style="font-size:10px;color:var(--muted)">${e.ok?'✓ OK':'✗ Absent'}</div></div></div>`;});
+  ih+=`</div></div><div><div style="font-size:12px;font-weight:600;color:var(--red);margin-bottom:8px">📤 État de sortie</div><div class="inv-grid">`;
+  inv.sortie.forEach((e,i)=>{ih+=`<div class="inv-item ${e.ok?'ok':'nok'}" onclick="toggleInv(${id},'sortie',${i})"><i class="ti ${e.ok?'ti-circle-check':'ti-circle-x'}"></i><div><div style="font-size:11px;font-weight:500">${e.nom}</div><div style="font-size:10px;color:var(--muted)">${e.ok?'✓ OK':'✗ Problème'}</div></div></div>`;});
+  ih+=`</div></div>`;
+  document.getElementById('at-inv').innerHTML=ih;
+  // Proprete
+  const prop=propData[id];
+  const done=prop.zones.filter(z=>z.fait).length;
+  const pct=Math.round(done/prop.zones.length*100);
+  let ph=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px"><span style="font-size:12px;color:var(--muted)">${done}/${prop.zones.length} zones</span><span style="font-size:14px;font-weight:700;color:${pct>=80?'var(--green)':pct>=50?'var(--accent)':'var(--red)'}">${pct}%</span></div><div class="credit-bar"><div class="credit-fill" style="width:${pct}%;background:${pct>=80?'var(--green)':pct>=50?'var(--accent)':'var(--red)'}"></div></div><div class="clean-grid" style="margin-top:12px">`;
+  prop.zones.forEach((z,i)=>{ph+=`<div class="clean-item ${z.fait?'done':''}" onclick="toggleClean(${id},${i})"><div class="ci-dot"></div><span>${z.nom}</span></div>`;});
+  ph+=`</div>`;
+  document.getElementById('at-prop').innerHTML=ph;
+  // Energie
+  const exp=new Date(a.canalExp);const now=new Date();const diff=Math.ceil((exp-now)/86400000);
+  const sbeeC=a.sbeeCredit<=waConfig.sbeeSeuil?'al-danger':a.sbeeCredit<=20?'al-warn':'al-green';
+  document.getElementById('at-en').innerHTML=`
+    <div class="grid2" style="gap:12px">
+      <div class="card-sm"><div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:10px">⚡ SBEE</div>
+        <div class="form-group"><label>N° Compteur</label><input type="text" value="${a.sbeeNum}" onchange="apartments.find(x=>x.id==${id}).sbeeNum=this.value"></div>
+        <div class="form-group"><label>Crédit (kWh)</label><input type="number" value="${a.sbeeCredit}" onchange="apartments.find(x=>x.id==${id}).sbeeCredit=+this.value;renderDashboard()"></div>
+        <div class="credit-bar"><div class="credit-fill" style="width:${Math.min(100,a.sbeeCredit)}%;background:${a.sbeeCredit<=5?'var(--red)':a.sbeeCredit<=20?'var(--accent)':'var(--green)'}"></div></div>
+        <div class="alert ${sbeeC}" style="margin-top:8px;font-size:11px"><i class="ti ${a.sbeeCredit<=waConfig.sbeeSeuil?'ti-alert-triangle':'ti-check'}"></i>${a.sbeeCredit<=waConfig.sbeeSeuil?'⚠ Alerte WhatsApp activée !':'Crédit suffisant'}</div>
+      </div>
+      <div class="card-sm"><div style="font-size:12px;font-weight:700;color:var(--blue);margin-bottom:10px">📺 Canal+</div>
+        <div class="form-group"><label>N° Décodeur</label><input type="text" value="${a.canalNum}" onchange="apartments.find(x=>x.id==${id}).canalNum=this.value"></div>
+        <div class="form-group"><label>Expiration</label><input type="date" value="${a.canalExp}" onchange="apartments.find(x=>x.id==${id}).canalExp=this.value;renderDashboard()"></div>
+        <div class="alert ${diff<=0?'al-danger':diff<=2?'al-danger':diff<=7?'al-warn':'al-green'}" style="margin-top:8px;font-size:11px">
+          <i class="ti ${diff<=0?'ti-x':diff<=7?'ti-clock':'ti-check'}"></i>
+          ${diff<=0?'Expiré ! Renouveler maintenant':diff<=2?`⚠ Relance : expire dans ${diff}j`:diff<=7?`Alerte dans ${diff} jours`:`Valide ${diff} jours`}
+        </div>
+      </div>
+    </div>`;
+  // Historique
+  const locs=locations.filter(l=>l.aptId===id);
+  let histH=locs.length?'<div class="timeline">':'<div class="empty"><i class="ti ti-calendar"></i>Aucune location</div>';
+  locs.forEach(l=>{const c=clients.find(x=>x.id===l.clientId);histH+=`<div class="tl-item"><div class="tl-dot"></div><div class="tl-date">${l.entree} → ${l.sortie}</div><div style="font-weight:600">${c?c.nom:'?'}</div><div style="color:var(--muted);font-size:11px">${l.prix.toLocaleString()} FCFA · <span class="chip ${l.statut==='actif'?'c-green':'c-blue'}">${l.statut}</span></div></div>`;});
+  if(locs.length) histH+='</div>';
+  document.getElementById('at-hist').innerHTML=histH;
+}
+function toggleInv(id,t,i){invData[id][t][i].ok=!invData[id][t][i].ok;fillAptTabs(id);}
+function toggleClean(id,i){propData[id].zones[i].fait=!propData[id].zones[i].fait;fillAptTabs(id);}
+function aptTab(id,btn){
+  ['at-inv','at-prop','at-en','at-hist'].forEach(t=>document.getElementById(t).style.display=t===id?'block':'none');
+  btn.closest('.tabs').querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+// ===== CLIENTS =====
+function renderClients(){
+  const q=(document.getElementById('cl-search')?.value||'').toLowerCase();
+  const data=clients.filter(c=>c.nom.toLowerCase().includes(q)||c.wa.includes(q));
+  const tb=document.getElementById('cl-tbody');if(!tb)return;
+  tb.innerHTML=data.map(c=>`<tr>
+    <td><div style="display:flex;align-items:center;gap:8px"><div class="avatar">${c.nom.charAt(0)}</div><div style="font-weight:500;font-size:12px">${c.nom}</div></div></td>
+    <td><a href="https://wa.me/${c.wa.replace(/\D/g,'')}" style="color:#25D366;text-decoration:none;font-size:12px">${c.wa}</a></td>
+    <td class="hide-mobile" style="font-size:11px;color:var(--muted);max-width:180px">${c.note}</td>
+    <td><div style="display:flex;gap:1px">${[1,2,3,4,5].map(s=>`<span style="font-size:12px;color:${s<=c.stars?'var(--accent)':'var(--muted2)'}">★</span>`).join('')}</div></td>
+    <td><button class="btn btn-ghost btn-sm" onclick="editCl(${c.id})"><i class="ti ti-edit"></i></button></td>
+  </tr>`).join('')||`<tr><td colspan="5" class="empty">Aucun client</td></tr>`;
+}
+function saveClient(){
+  const nom=document.getElementById('cl-nom').value.trim();if(!nom)return alert('Nom requis');
+  clients.push({id:Date.now(),nom,wa:document.getElementById('cl-wa').value,note:document.getElementById('cl-note').value,stars:starsVal,statut:'actif'});
+  closeModal('modal-add-client');renderClients();renderDashboard();
+}
+function editCl(id){const c=clients.find(x=>x.id===id);if(!c)return;document.getElementById('cl-nom').value=c.nom;document.getElementById('cl-wa').value=c.wa;document.getElementById('cl-note').value=c.note;starsVal=c.stars;updateStars();openModal('modal-add-client');}
+function setStars(e){const s=e.target.closest('.star');if(!s)return;starsVal=+s.dataset.v;updateStars();}
+function updateStars(){document.querySelectorAll('#stars-inp .star').forEach(s=>s.classList.toggle('on',+s.dataset.v<=starsVal));}
+function showPrev(inp,imgId){const r=new FileReader();r.onload=e=>{const i=document.getElementById(imgId);i.src=e.target.result;i.style.display='block';};r.readAsDataURL(inp.files[0]);}
+
+// ===== LOCATIONS =====
+function renderLocations(){
+  const tb=document.getElementById('loc-tbody');if(!tb)return;
+  tb.innerHTML=locations.map(l=>{
+    const a=apartments.find(x=>x.id===l.aptId);const c=clients.find(x=>x.id===l.clientId);
+    const j=Math.ceil((new Date(l.sortie)-new Date(l.entree))/86400000);
+    return`<tr><td style="font-weight:500;font-size:12px">${a?a.nom:'?'}</td><td><div style="display:flex;align-items:center;gap:6px"><div class="avatar" style="width:24px;height:24px;font-size:10px">${c?c.nom.charAt(0):'?'}</div><span style="font-size:12px">${c?c.nom:'?'}</span></div></td><td class="hide-mobile" style="font-size:12px">${l.entree}</td><td style="font-size:12px">${l.sortie}</td><td><span class="chip ${l.statut==='actif'?'c-green':'c-blue'}">${l.statut}</span></td><td><button class="btn btn-danger btn-sm" onclick="endLoc(${l.id})" ${l.statut!=='actif'?'disabled':''}>Clôturer</button></td></tr>`;
+  }).join('')||`<tr><td colspan="6" class="empty">Aucune location</td></tr>`;
+}
+function openAddLocation(){
+  document.getElementById('loc-apt').innerHTML=apartments.map(a=>`<option value="${a.id}">${a.nom}</option>`).join('');
+  document.getElementById('loc-cl').innerHTML=clients.map(c=>`<option value="${c.id}">${c.nom}</option>`).join('');
+  openModal('modal-add-location');
+}
+function saveLocation(){
+  locations.push({id:Date.now(),aptId:+document.getElementById('loc-apt').value,clientId:+document.getElementById('loc-cl').value,entree:document.getElementById('loc-entree').value,sortie:document.getElementById('loc-sortie').value,prix:+document.getElementById('loc-prix').value||0,avance:+document.getElementById('loc-avance').value||0,statut:'actif'});
+  closeModal('modal-add-location');renderLocations();
+}
+function endLoc(id){const l=locations.find(x=>x.id===id);if(l)l.statut='terminé';renderLocations();}
+
+// ===== INVENTAIRE =====
+function renderInventaire(){
+  const aptF=document.getElementById('inv-apt-f')?.value;
+  const typeF=document.getElementById('inv-type-f')?.value||'';
+  const sel=document.getElementById('inv-apt-f');
+  if(sel&&sel.options.length<=1) apartments.forEach(a=>{const o=document.createElement('option');o.value=a.id;o.textContent=a.nom;sel.appendChild(o);});
+  const apts=aptF?apartments.filter(a=>a.id==aptF):apartments;
+  let h='';
+  apts.forEach(a=>{
+    const inv=invData[a.id];
+    h+=`<div class="section-wrap"><div class="sec-title" style="margin-bottom:12px"><i class="ti ti-building"></i>${a.nom}</div>`;
+    if(!typeF||typeF==='entree'){const ok=inv.entree.filter(e=>e.ok).length;h+=`<div style="font-size:11px;font-weight:600;color:var(--green);margin-bottom:7px">📥 Entrée — ${ok}/${inv.entree.length}</div><div class="inv-grid" style="margin-bottom:14px">`;inv.entree.forEach((e,i)=>{h+=`<div class="inv-item ${e.ok?'ok':'nok'}" onclick="invData[${a.id}].entree[${i}].ok=!invData[${a.id}].entree[${i}].ok;renderInventaire()"><i class="ti ${e.ok?'ti-circle-check':'ti-circle-x'}"></i><div><div style="font-size:11px;font-weight:500">${e.nom}</div></div></div>`;});h+=`</div>`;}
+    if(!typeF||typeF==='sortie'){const ok2=inv.sortie.filter(e=>e.ok).length;h+=`<div style="font-size:11px;font-weight:600;color:var(--red);margin-bottom:7px">📤 Sortie — ${ok2}/${inv.sortie.length}</div><div class="inv-grid">`;inv.sortie.forEach((e,i)=>{h+=`<div class="inv-item ${e.ok?'ok':'nok'}" onclick="invData[${a.id}].sortie[${i}].ok=!invData[${a.id}].sortie[${i}].ok;renderInventaire()"><i class="ti ${e.ok?'ti-circle-check':'ti-circle-x'}"></i><div><div style="font-size:11px;font-weight:500">${e.nom}</div></div></div>`;});h+=`</div>`;}
+    h+=`</div>`;
+  });
+  document.getElementById('inv-content').innerHTML=h;
+}
+
+// ===== PROPRETE =====
+function renderProprete(){
+  const aptF=document.getElementById('prop-apt-f')?.value;
+  const sel=document.getElementById('prop-apt-f');
+  if(sel&&sel.options.length<=1) apartments.forEach(a=>{const o=document.createElement('option');o.value=a.id;o.textContent=a.nom;sel.appendChild(o);});
+  const apts=aptF?apartments.filter(a=>a.id==aptF):apartments;
+  let h='';
+  apts.forEach(a=>{
+    const p=propData[a.id];const done=p.zones.filter(z=>z.fait).length;const pct=Math.round(done/p.zones.length*100);
+    h+=`<div class="section-wrap"><div class="sec-hdr"><div class="sec-title"><i class="ti ti-building"></i>${a.nom}</div><span style="font-size:13px;font-weight:700;color:${pct>=80?'var(--green)':pct>=50?'var(--accent)':'var(--red)'}">${pct}%</span></div><div class="credit-bar"><div class="credit-fill" style="width:${pct}%;background:${pct>=80?'var(--green)':pct>=50?'var(--accent)':'var(--red)'}"></div></div><div class="clean-grid" style="margin-top:12px">`;
+    p.zones.forEach((z,i)=>{h+=`<div class="clean-item ${z.fait?'done':''}" onclick="propData[${a.id}].zones[${i}].fait=!propData[${a.id}].zones[${i}].fait;renderProprete()"><div class="ci-dot"></div><span>${z.nom}</span></div>`;});
+    h+=`</div></div>`;
+  });
+  document.getElementById('prop-content').innerHTML=h;
+}
+
+// ===== ENERGIE =====
+function renderEnergie(){
+  // SBEE
+  let h='<div class="apt-grid">';
+  apartments.forEach(a=>{
+    const p=Math.min(100,a.sbeeCredit);const c=p<=5?'var(--red)':p<=20?'var(--accent)':'var(--green)';
+    h+=`<div class="card" style="border-color:${p<=5?'rgba(239,68,68,.4)':p<=20?'rgba(245,158,11,.4)':'var(--border)'}">
+      <div style="display:flex;justify-content:space-between;margin-bottom:10px">
+        <div><div style="font-weight:600;font-size:13px">${a.nom}</div><div style="font-size:11px;color:var(--muted)">${a.sbeeNum}</div></div>
+        <div style="font-size:22px;font-weight:700;color:${c}">${a.sbeeCredit}<span style="font-size:11px;font-weight:400"> kWh</span></div>
+      </div>
+      <div class="credit-bar"><div class="credit-fill" style="width:${p}%;background:${c}"></div></div>
+      <div style="margin-top:10px;display:flex;gap:6px">
+        <input type="number" placeholder="+ kWh" id="sbee-inp-${a.id}" style="flex:1;padding:6px 8px;font-size:12px">
+        <button class="btn btn-primary btn-sm" onclick="rechSBEE(${a.id})"><i class="ti ti-plus"></i>Recharger</button>
+        <button class="btn btn-wa btn-sm" onclick="sendWaQuick('sbee',${a.id})"><i class="ti ti-brand-whatsapp"></i></button>
+      </div>
+      ${p<=5?`<div class="alert al-danger" style="margin-top:8px;font-size:11px"><i class="ti ti-alert-triangle" style="color:var(--red)"></i> Alerte WhatsApp envoyée !</div>`:''}
+    </div>`;
+  });
+  h+='</div>';
+  document.getElementById('en-sbee-wrap').innerHTML=h;
+  // Canal
+  let ch='<div class="apt-grid">';
+  apartments.forEach(a=>{
+    const diff=Math.ceil((new Date(a.canalExp)-new Date())/86400000);
+    ch+=`<div class="card" style="border-color:${diff<=0?'rgba(239,68,68,.5)':diff<=2?'rgba(239,68,68,.3)':diff<=7?'rgba(245,158,11,.3)':'var(--border)'}">
+      <div style="display:flex;justify-content:space-between;margin-bottom:10px">
+        <div><div style="font-weight:600;font-size:13px">${a.nom}</div><div style="font-size:11px;color:var(--muted)">${a.canalNum}</div></div>
+        <span class="chip ${diff<=0?'c-red':diff<=2?'c-red':diff<=7?'c-orange':'c-green'}">${diff<=0?'Expiré':diff+' j'}</span>
+      </div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:8px">Expiration : <b style="color:var(--text)">${a.canalExp}</b></div>
+      <div class="form-group"><label>Renouveler jusqu'au</label><input type="date" style="font-size:12px" onchange="apartments.find(x=>x.id==${a.id}).canalExp=this.value;renderEnergie();renderDashboard()"></div>
+      <div style="display:flex;gap:6px">
+        <button class="btn btn-wa btn-sm" style="flex:1" onclick="sendWaQuick('canal${diff<=2?'2':'7'}',${a.id})"><i class="ti ti-brand-whatsapp"></i>Alerter</button>
+      </div>
+      ${diff<=2&&diff>0?`<div class="alert al-danger" style="margin-top:8px;font-size:11px"><i class="ti ti-clock"></i> Message de relance disponible</div>`:''}
+    </div>`;
+  });
+  ch+='</div>';
+  document.getElementById('en-canal-wrap').innerHTML=ch;
+}
+function enTab(id,btn){document.getElementById('en-sbee-wrap').style.display=id==='sbee'?'block':'none';document.getElementById('en-canal-wrap').style.display=id==='canal'?'block':'none';btn.closest('.tabs').querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));btn.classList.add('active');}
+function rechSBEE(id){const inp=document.getElementById('sbee-inp-'+id);const v=+inp.value;if(!v||v<=0)return;const a=apartments.find(x=>x.id===id);if(a){a.sbeeCredit=Math.min(999,a.sbeeCredit+v);inp.value='';renderEnergie();renderDashboard();}}
+
+// ===== MAINTENANCE =====
+function renderMaintenance(){
+  const f=document.getElementById('maint-f')?.value||'';
+  let data=maintenances;
+  if(f==='urgent') data=data.filter(m=>m.prio==='high'&&m.statut!=='done');
+  else if(f==='planifie') data=data.filter(m=>m.statut==='planifie');
+  else if(f==='done') data=data.filter(m=>m.statut==='done');
+  const tecSel=document.getElementById('m-tech');
+  if(tecSel&&tecSel.options.length<=1) technicians.forEach(t=>{const o=document.createElement('option');o.value=t.id;o.textContent=t.nom+' ('+t.spec+')';tecSel.appendChild(o);});
+  const aptSel=document.getElementById('m-apt');
+  if(aptSel&&aptSel.options.length===0) apartments.forEach(a=>{const o=document.createElement('option');o.value=a.id;o.textContent=a.nom;aptSel.appendChild(o);});
+  let h='';
+  if(!data.length){h='<div class="empty"><i class="ti ti-tool"></i>Aucune maintenance</div>';}
+  data.forEach(m=>{
+    const a=apartments.find(x=>x.id===m.aptId);
+    const t=technicians.find(x=>x.id===m.techId);
+    const pClass={high:'urgent',med:'warn',low:'ok'}[m.prio];
+    const pDot={high:'p-high',med:'p-med',low:'p-low'}[m.prio];
+    const pLbl={high:'🔴 Urgent',med:'🟡 Moyen',low:'🟢 Faible'}[m.prio];
+    h+=`<div class="maint-card ${pClass}" style="position:relative">
+      <div style="display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap">
+        <div class="priority-dot ${pDot}" style="margin-top:4px"></div>
+        <div style="flex:1;min-width:180px">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px">
+            <span style="font-weight:600;font-size:13px">${a?a.nom:'?'}</span>
+            <span class="chip c-purple">${m.type}</span>
+            <span class="chip ${m.statut==='done'?'c-green':m.prio==='high'?'c-red':'c-orange'}">${m.statut==='done'?'Terminé':pLbl}</span>
+          </div>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:6px">${m.desc}</div>
+          <div style="display:flex;gap:12px;flex-wrap:wrap;font-size:11px;color:var(--muted2)">
+            <span><i class="ti ti-calendar"></i> ${m.date}</span>
+            <span><i class="ti ti-coin"></i> ${m.cout.toLocaleString()} FCFA</span>
+            ${t?`<span><i class="ti ti-user"></i> ${t.nom}</span>`:'<span style="color:var(--red)"><i class="ti ti-user-x"></i> Non assigné</span>'}
+            ${m.rappel?`<span style="color:#25D366"><i class="ti ti-brand-whatsapp"></i> Rappels /48h</span>`:''}
+          </div>
+        </div>
+        <div style="display:flex;gap:6px;flex-shrink:0">
+          ${m.statut!=='done'?`<button class="btn btn-green btn-sm" onclick="doneMaint(${m.id})"><i class="ti ti-check"></i>Terminé</button>`:''}
+          ${m.rappel&&m.statut!=='done'?`<button class="btn btn-wa btn-sm" onclick="sendWaQuick('maint',${m.aptId})"><i class="ti ti-brand-whatsapp"></i></button>`:''}
+          <button class="btn btn-danger btn-sm" onclick="delMaint(${m.id})"><i class="ti ti-trash"></i></button>
+        </div>
+      </div>
+    </div>`;
+  });
+  document.getElementById('maint-content').innerHTML=h;
+  document.getElementById('maint-badge').textContent=maintenances.filter(m=>m.statut!=='done').length;
+}
+function saveMaint(){
+  const aptSel=document.getElementById('m-apt');if(!aptSel.value)return alert('Choisir un appartement');
+  maintenances.push({id:Date.now(),aptId:+aptSel.value,techId:+document.getElementById('m-tech').value||null,type:document.getElementById('m-type').value,prio:document.getElementById('m-prio').value,date:document.getElementById('m-date').value,cout:+document.getElementById('m-cout').value||0,desc:document.getElementById('m-desc').value,statut:'planifie',rappel:document.getElementById('m-rappel').checked});
+  closeModal('modal-add-maint');renderMaintenance();renderDashboard();
+}
+function doneMaint(id){const m=maintenances.find(x=>x.id===id);if(m){m.statut='done';const dep={id:Date.now(),date:new Date().toISOString().split('T')[0],aptId:m.aptId,type:m.type,desc:m.desc,montant:m.cout,techId:m.techId};depenses.push(dep);}renderMaintenance();renderDashboard();}
+function delMaint(id){if(confirm('Supprimer cette maintenance ?')){maintenances=maintenances.filter(x=>x.id!==id);renderMaintenance();renderDashboard();}}
+
+// ===== TECHNICIENS =====
+function renderTechnicians(){
+  const g=document.getElementById('tech-grid');if(!g)return;
+  const mSel=document.getElementById('m-tech');
+  if(mSel){mSel.innerHTML='<option value="">Non assigné</option>';technicians.forEach(t=>{const o=document.createElement('option');o.value=t.id;o.textContent=t.nom+' ('+t.spec+')';mSel.appendChild(o);});}
+  const specColors={'Électricien':'c-orange','Plombier':'c-blue','Climaticien':'c-teal','Peintre':'c-purple','Menuisier':'c-green','Technicien général':'c-teal'};
+  g.innerHTML=technicians.map(t=>`
+    <div class="tech-card">
+      <div class="tech-avatar">${t.nom.charAt(0)}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:600;font-size:13px">${t.nom}</div>
+        <div><span class="chip ${specColors[t.spec]||'c-blue'}">${t.spec}</span></div>
+        <div style="margin-top:6px;font-size:11px;color:var(--muted)">
+          <div><a href="https://wa.me/${t.wa.replace(/\D/g,'')}" style="color:#25D366;text-decoration:none"><i class="ti ti-brand-whatsapp" style="font-size:13px"></i> ${t.wa}</a></div>
+          <div><i class="ti ti-coin" style="font-size:11px"></i> ${t.tarif.toLocaleString()} FCFA / intervention</div>
+        </div>
+        <div style="margin-top:6px;display:flex;gap:6px">
+          <button class="btn btn-wa btn-sm" onclick="sendWaTech(${t.id})"><i class="ti ti-brand-whatsapp"></i>Contacter</button>
+          <button class="btn btn-danger btn-sm" onclick="delTech(${t.id})"><i class="ti ti-trash"></i></button>
+        </div>
+      </div>
+    </div>`).join('')||'<div class="empty"><i class="ti ti-users-group"></i>Aucun technicien</div>';
+}
+function saveTech(){
+  const nom=document.getElementById('t-nom').value.trim();if(!nom)return alert('Nom requis');
+  technicians.push({id:Date.now(),nom,wa:document.getElementById('t-wa').value,spec:document.getElementById('t-spec').value,tarif:+document.getElementById('t-tarif').value||5000});
+  closeModal('modal-add-tech');renderTechnicians();
+}
+function delTech(id){if(confirm('Supprimer ce technicien ?')){technicians=technicians.filter(x=>x.id!==id);renderTechnicians();}}
+function sendWaTech(id){const t=technicians.find(x=>x.id===id);if(!t)return;const msg=encodeURIComponent(`Bonjour ${t.nom},\nNous avons besoin de vos services.\nMerci de confirmer votre disponibilité.\n— MAX GUEST HOUSE`);window.open('https://wa.me/'+t.wa.replace(/\D/g,'')+'?text='+msg,'_blank');}
+
+// ===== STATS =====
+function renderStats(){
+  // Dépenses par mois
+  const months=['Jan','Fév','Mar','Avr','Mai','Jun'];
+  const vals=[0,0,50000,23000,27000,0];
+  depenses.forEach(d=>{const m=new Date(d.date).getMonth();if(m<6)vals[m]+=d.montant;});
+  const max=Math.max(...vals,1);
+  let barH=`<div class="bar-chart">`;
+  months.forEach((m,i)=>{const h=Math.round(vals[i]/max*80);barH+=`<div class="bar-item"><div class="bar-val">${vals[i]>0?Math.round(vals[i]/1000)+'k':''}</div><div class="bar" style="height:${h}px;background:${i===4?'var(--accent)':'var(--blue)'}"></div><div class="bar-lbl">${m}</div></div>`;});
+  barH+='</div>';
+  document.getElementById('chart-maint').innerHTML=barH;
+  // Répartition
+  const cats={};depenses.forEach(d=>{cats[d.type]=(cats[d.type]||0)+d.montant;});
+  const catColors={'Électricité':'var(--accent)','Plomberie':'var(--blue)','Climatisation':'var(--teal)','Peinture':'var(--purple)','Menuiserie':'var(--green)'};
+  const total=Object.values(cats).reduce((a,b)=>a+b,0)||1;
+  let catH='<div style="display:flex;flex-direction:column;gap:8px">';
+  Object.entries(cats).forEach(([k,v])=>{const pct=Math.round(v/total*100);catH+=`<div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px"><span>${k}</span><span style="font-weight:600">${Math.round(v/1000)}k FCFA (${pct}%)</span></div><div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:${catColors[k]||'var(--blue)'}"></div></div></div>`;});
+  catH+='</div>';
+  document.getElementById('chart-cat').innerHTML=catH;
+  // Tableau
+  const tb=document.getElementById('depenses-tbody');
+  if(tb) tb.innerHTML=depenses.map(d=>{const a=apartments.find(x=>x.id===d.aptId);const t=technicians.find(x=>x.id===d.techId);
+  return`<tr><td style="font-size:12px">${d.date}</td><td style="font-size:12px">${a?a.nom:'?'}</td><td><span class="chip c-purple">${d.type}</span></td><td style="font-size:12px;color:var(--muted)">${d.desc}</td><td style="font-weight:600;color:var(--red);font-size:12px">${d.montant.toLocaleString()} FCFA</td><td style="font-size:12px;color:var(--teal)">${t?t.nom:'Non assigné'}</td></tr>`;}).join('')||'<tr><td colspan="6" class="empty">Aucune dépense</td></tr>';
+  const total2=depenses.reduce((s,d)=>s+d.montant,0);
+  document.getElementById('stat-maint-total').textContent=Math.round(total2/1000)+'K';
+}
+
+// ===== WHATSAPP =====
+function buildWaMsg(type,aptId){
+  const a=apartments.find(x=>x.id==aptId);
+  const diff=a?Math.ceil((new Date(a.canalExp)-new Date())/86400000):0;
+  const msgs={
+    sbee:`🏠 *MAX GUEST HOUSE*\n⚡ ALERTE SBEE\n\nAppartement : ${a?a.nom:'?'}\nCompteur : ${a?a.sbeeNum:'?'}\nCrédit restant : *${a?a.sbeeCredit:0} kWh*\n\n⚠️ Le crédit est critique ! Veuillez recharger immédiatement.\n\n📞 0196381777`,
+    canal7:`🏠 *MAX GUEST HOUSE*\n📺 ALERTE CANAL+\n\nAppartement : ${a?a.nom:'?'}\nDécodeur : ${a?a.canalNum:'?'}\nExpiration dans *${diff} jours* (${a?a.canalExp:'?'})\n\n🔔 Pensez à renouveler l'abonnement.\n\n📞 0196381777`,
+    canal2:`🏠 *MAX GUEST HOUSE*\n📺 ⚠️ RELANCE URGENTE CANAL+\n\nAppartement : ${a?a.nom:'?'}\nL'abonnement expire dans *${diff} jour(s)* !\n\n🚨 ACTION REQUISE : Renouveler MAINTENANT pour éviter une interruption de service.\n\n📞 0196381777`,
+    maint:`🏠 *MAX GUEST HOUSE*\n🔧 RAPPEL MAINTENANCE\n\nAppartement : ${a?a.nom:'?'}\nUne maintenance est planifiée pour cet appartement.\n\n📋 Merci de contacter l'équipe MAX GUEST HOUSE.\n\n📞 0196381777`,
+    libre:`🏠 *MAX GUEST HOUSE*\n\n${a?a.nom:'L\'appartement'} est disponible à la location !\n\n💰 Prix : ${a?(a.prix.toLocaleString()+' FCFA/nuit'):'?'}\n\nContactez-nous pour réserver.\n📞 0196381777`,
+  };
+  return msgs[type]||msgs.maint;
+}
+function previewWaMsg(){
+  const t=document.getElementById('wa-type')?.value;
+  const aptId=document.getElementById('wa-apt')?.value;
+  const el=document.getElementById('wa-preview-text');
+  if(el&&t&&aptId) el.textContent=buildWaMsg(t,aptId).replace(/\*/g,'');
+}
+function renderWaPage(){
+  const sel=document.getElementById('wa-apt');
+  if(sel&&sel.options.length===0) apartments.forEach(a=>{const o=document.createElement('option');o.value=a.id;o.textContent=a.nom;sel.appendChild(o);});
+  document.getElementById('wa-owner').value=waConfig.ownerWa;
+  document.getElementById('wa-sbee-seuil').value=waConfig.sbeeSeuil;
+  document.getElementById('wa-canal-seuil').value=waConfig.canalSeuil;
+  document.getElementById('wa-maint-freq').value=waConfig.maintFreq;
+  renderWaLog();
+  previewWaMsg();
+}
+function saveWaConfig(){
+  waConfig.ownerWa=document.getElementById('wa-owner').value;
+  waConfig.sbeeSeuil=+document.getElementById('wa-sbee-seuil').value;
+  waConfig.canalSeuil=+document.getElementById('wa-canal-seuil').value;
+  waConfig.maintFreq=+document.getElementById('wa-maint-freq').value;
+  alert('Configuration WhatsApp enregistrée ✓');
+  renderDashboard();
+}
+function sendWaAlert(){
+  const type=document.getElementById('wa-type').value;
+  const aptId=document.getElementById('wa-apt').value;
+  sendWaQuick(type,aptId);
+}
+function sendWaQuick(type,aptId){
+  const a=apartments.find(x=>x.id==aptId);
+  const msg=buildWaMsg(type,aptId);
+  const wa=waConfig.ownerWa.replace(/\D/g,'');
+  waLogs.unshift({time:new Date().toLocaleString('fr-FR'),type,apt:a?a.nom:'?',msg:msg.split('\n')[1]||type});
+  document.getElementById('wa-badge').textContent=waLogs.length;
+  if(document.getElementById('page-whatsapp').classList.contains('active')) renderWaLog();
+  window.open('https://wa.me/'+wa+'?text='+encodeURIComponent(msg),'_blank');
+}
+function renderWaLog(){
+  const el=document.getElementById('wa-log-list');if(!el)return;
+  document.getElementById('wa-log-count').textContent=waLogs.length;
+  if(!waLogs.length){el.innerHTML='<div class="empty"><i class="ti ti-brand-whatsapp"></i>Aucun message envoyé</div>';return;}
+  el.innerHTML=waLogs.slice(0,20).map(l=>`
+    <div class="wa-log-item">
+      <i class="ti ti-brand-whatsapp" style="color:#25D366;font-size:18px;margin-top:1px"></i>
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:500">${l.apt}</div>
+        <div style="color:var(--muted);font-size:11px">${l.msg}</div>
+      </div>
+      <div style="text-align:right">
+        <span class="sent-badge">Envoyé</span>
+        <div class="wa-time">${l.time}</div>
+      </div>
+    </div>`).join('');
+}
+
+// ===== MODALS =====
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+document.querySelectorAll('.modal-bg').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');}));
+
+// Patch: location modal
+const origOpenLoc=window.openAddLocation;
+document.getElementById('modal-add-location').querySelector('.btn-primary')?.addEventListener('click',saveLocation);
+
+// ===== INIT =====
+renderDashboard();
+
+// Auto-check alerts & auto-WA (simulation)
+function autoCheckAlerts(){
+  apartments.forEach(a=>{
+    if(a.sbeeCredit<=waConfig.sbeeSeuil){
+      const already=waLogs.some(l=>l.type==='sbee'&&l.apt===a.nom);
+      if(!already){waLogs.unshift({time:new Date().toLocaleString('fr-FR'),type:'sbee',apt:a.nom,msg:'⚡ ALERTE SBEE auto : crédit critique'});document.getElementById('wa-badge').textContent=waLogs.length;}
+    }
+    const diff=Math.ceil((new Date(a.canalExp)-new Date())/86400000);
+    if(diff<=waConfig.canalSeuil&&diff>0){
+      const t=diff<=2?'canal2':'canal7';
+      const already=waLogs.some(l=>l.type===t&&l.apt===a.nom);
+      if(!already){waLogs.unshift({time:new Date().toLocaleString('fr-FR'),type:t,apt:a.nom,msg:`📺 Alerte Canal+ auto : expire dans ${diff}j`});document.getElementById('wa-badge').textContent=waLogs.length;}
+    }
+  });
+}
+autoCheckAlerts();
+</script>
+</body>
+</html>
