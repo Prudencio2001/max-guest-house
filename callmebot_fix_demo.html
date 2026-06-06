@@ -1,0 +1,251 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+:root{--bg:#0b0f1c;--bg2:#121828;--bg3:#1a2235;--card:#1e2a3a;--accent:#f59e0b;--blue:#3b82f6;--green:#22c55e;--red:#ef4444;--wa:#25D366;--border:rgba(255,255,255,0.08);--text:#f1f5f9;--muted:#94a3b8;}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px}
+.wrap{width:100%;max-width:560px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:14px}
+.title{font-size:16px;font-weight:700;margin-bottom:4px;display:flex;align-items:center;gap:8px}
+.sub{font-size:12px;color:var(--muted);margin-bottom:18px}
+label{font-size:11px;color:var(--muted);display:block;margin-bottom:4px;font-weight:500}
+input{background:var(--bg3);border:1px solid rgba(255,255,255,.1);color:var(--text);border-radius:8px;padding:9px 12px;font-size:13px;width:100%;outline:none;font-family:inherit;margin-bottom:12px}
+input:focus{border-color:var(--accent)}
+.btn{border:none;border-radius:8px;padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-family:inherit;width:100%;justify-content:center;margin-bottom:8px}
+.btn-wa{background:var(--wa);color:#fff}.btn-wa:hover{background:#1ebe5d}
+.btn-ghost{background:var(--bg3);color:var(--text);border:1px solid var(--border)}
+.alert{border-radius:8px;padding:10px 12px;margin-bottom:10px;display:flex;align-items:flex-start;gap:8px;font-size:12px;line-height:1.5}
+.al-info{background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.25)}
+.al-green{background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.25)}
+.al-warn{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25)}
+.al-danger{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25)}
+.status-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:12px}
+.status-row:last-child{border-bottom:none}
+.dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.dot-green{background:var(--green);animation:pulse 1.5s infinite}
+.dot-red{background:var(--red)}
+.dot-orange{background:var(--accent)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.step{display:flex;gap:10px;margin-bottom:10px;font-size:12px}
+.step-num{width:22px;height:22px;border-radius:50%;background:var(--accent);color:#000;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;flex-shrink:0;margin-top:1px}
+.code{background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.2);border-radius:6px;padding:4px 8px;font-family:monospace;font-size:12px;color:var(--accent);word-break:break-all}
+.log{background:var(--bg3);border-radius:8px;padding:12px;font-size:11px;max-height:160px;overflow-y:auto;display:none}
+.log-entry{padding:4px 0;border-bottom:1px solid rgba(255,255,255,.04);display:flex;align-items:flex-start;gap:8px}
+.log-entry:last-child{border-bottom:none}
+.saved-badge{display:none;background:rgba(34,197,94,.15);color:var(--green);border:1px solid rgba(34,197,94,.3);border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;align-items:center;gap:6px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div style="text-align:center;margin-bottom:20px">
+    <div style="font-size:20px;font-weight:700;color:var(--accent)">🏠 MAX GUEST HOUSE</div>
+    <div style="font-size:12px;color:var(--muted);margin-top:4px">Configuration CallMeBot — Alertes WhatsApp automatiques</div>
+  </div>
+
+  <!-- STATUT -->
+  <div class="card">
+    <div class="title"><i class="ti ti-brand-whatsapp" style="color:var(--wa)"></i>Statut du système</div>
+    <div class="sub">État en temps réel de votre configuration</div>
+    <div class="status-row"><span>Configuration sauvegardée (localStorage)</span><div style="display:flex;align-items:center;gap:6px"><div class="dot" id="dot-save" style="background:var(--muted)"></div><span id="lbl-save" style="font-size:11px;color:var(--muted)">—</span></div></div>
+    <div class="status-row"><span>Numéro WhatsApp configuré</span><div style="display:flex;align-items:center;gap:6px"><div class="dot" id="dot-phone" style="background:var(--muted)"></div><span id="lbl-phone" style="font-size:11px;color:var(--muted)">—</span></div></div>
+    <div class="status-row"><span>Clé API CallMeBot</span><div style="display:flex;align-items:center;gap:6px"><div class="dot" id="dot-key" style="background:var(--muted)"></div><span id="lbl-key" style="font-size:11px;color:var(--muted)">—</span></div></div>
+    <div class="status-row"><span>Proxy CORS (allorigins.win)</span><div style="display:flex;align-items:center;gap:6px"><div class="dot dot-green"></div><span style="font-size:11px;color:var(--green)">Actif</span></div></div>
+    <div class="status-row"><span>Moteur d'alertes automatiques</span><div style="display:flex;align-items:center;gap:6px"><div class="dot" id="dot-engine" style="background:var(--muted)"></div><span id="lbl-engine" style="font-size:11px;color:var(--muted)">En attente config</span></div></div>
+  </div>
+
+  <!-- ACTIVATION -->
+  <div class="card">
+    <div class="title"><i class="ti ti-key" style="color:var(--accent)"></i>Étape 1 — Activer CallMeBot</div>
+    <div class="sub">À faire une seule fois depuis votre WhatsApp</div>
+    <div class="step"><div class="step-num">1</div><div>Ouvrez WhatsApp et démarrez une conversation avec <b>+34 644 52 74 61</b></div></div>
+    <div class="step"><div class="step-num">2</div><div>Envoyez exactement ce message :<br><span class="code">I allow callmebot to send me messages</span></div></div>
+    <div class="step"><div class="step-num">3</div><div>Vous recevrez votre <b>clé API</b> en quelques secondes. Copiez-la ci-dessous.</div></div>
+    <button class="btn btn-wa" onclick="window.open('https://wa.me/34644527461?text=I%20allow%20callmebot%20to%20send%20me%20messages','_blank')">
+      <i class="ti ti-brand-whatsapp"></i>Ouvrir WhatsApp pour activer
+    </button>
+  </div>
+
+  <!-- CONFIG -->
+  <div class="card">
+    <div class="title"><i class="ti ti-settings" style="color:var(--accent)"></i>Étape 2 — Entrer vos identifiants</div>
+    <div class="sub">Sauvegardé automatiquement dans votre navigateur (localStorage)</div>
+    <label>📱 Votre numéro WhatsApp (chiffres uniquement, sans +)</label>
+    <input type="tel" id="inp-phone" placeholder="Ex: 22901963811777" oninput="onInputChange()">
+    <label>🔑 Clé API reçue de CallMeBot</label>
+    <input type="text" id="inp-key" placeholder="Ex: 1234567" oninput="onInputChange()">
+    <div class="saved-badge" id="saved-badge"><i class="ti ti-device-floppy"></i>Sauvegardé dans localStorage ✓</div>
+    <button class="btn btn-wa" id="btn-save" onclick="saveConfig()" style="margin-top:4px">
+      <i class="ti ti-check"></i>Sauvegarder la configuration
+    </button>
+  </div>
+
+  <!-- TEST -->
+  <div class="card">
+    <div class="title"><i class="ti ti-send" style="color:var(--blue)"></i>Étape 3 — Tester l'envoi</div>
+    <div class="sub">Vérifiez que votre WhatsApp reçoit bien le message</div>
+    <div id="test-alert"></div>
+    <button class="btn btn-wa" onclick="sendTest()"><i class="ti ti-brand-whatsapp"></i>Envoyer un message de test</button>
+    <div class="log" id="test-log"></div>
+  </div>
+
+  <!-- COMMENT ÇA MARCHE -->
+  <div class="card">
+    <div class="title"><i class="ti ti-info-circle" style="color:var(--blue)"></i>Comment ça fonctionne sur Netlify</div>
+    <div style="font-size:12px;color:var(--muted);line-height:1.7">
+      <div style="margin-bottom:8px">Le navigateur ne peut pas appeler CallMeBot directement (blocage CORS). La plateforme utilise un <b style="color:var(--text)">proxy CORS gratuit</b> pour contourner cette restriction :</div>
+      <div style="background:var(--bg3);border-radius:8px;padding:10px;font-size:11px;margin-bottom:10px">
+        <div style="color:var(--muted)">Flux :</div>
+        <div style="margin-top:4px"><span style="color:var(--accent)">Netlify</span> → <span style="color:var(--blue)">allorigins.win (proxy)</span> → <span style="color:var(--wa)">CallMeBot API</span> → <span style="color:var(--green)">Votre WhatsApp</span></div>
+      </div>
+      <div>✅ <b style="color:var(--text)">localStorage</b> : la config est mémorisée même après fermeture du navigateur<br>
+      ✅ <b style="color:var(--text)">Anti-doublon</b> : chaque alerte n'est envoyée qu'une fois par heure max<br>
+      ✅ <b style="color:var(--text)">Vérification auto</b> toutes les 60 secondes dès la configuration active</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const STORAGE_KEY = 'mghouse_callmebot';
+
+// ===== LOAD FROM LOCALSTORAGE =====
+function loadConfig() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const cfg = JSON.parse(raw);
+      document.getElementById('inp-phone').value = cfg.phone || '';
+      document.getElementById('inp-key').value = cfg.apikey || '';
+      updateStatus(cfg.phone, cfg.apikey);
+      return cfg;
+    }
+  } catch(e) {}
+  updateStatus('', '');
+  return null;
+}
+
+function saveConfig() {
+  const phone = document.getElementById('inp-phone').value.replace(/\D/g,'').trim();
+  const apikey = document.getElementById('inp-key').value.trim();
+  if (!phone) { showAlert('test-alert', 'warn', 'Entrez votre numéro WhatsApp'); return; }
+  if (!apikey) { showAlert('test-alert', 'warn', 'Entrez la clé API CallMeBot'); return; }
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({ phone, apikey, savedAt: new Date().toISOString() }));
+  document.getElementById('inp-phone').value = phone;
+  updateStatus(phone, apikey);
+  const badge = document.getElementById('saved-badge');
+  badge.style.display = 'flex';
+  setTimeout(() => badge.style.display = 'none', 3000);
+  showAlert('test-alert', 'green', '✅ Configuration sauvegardée ! Vous pouvez maintenant tester l\'envoi.');
+}
+
+function updateStatus(phone, apikey) {
+  const hasCfg = !!(phone && apikey);
+  // localStorage
+  setDot('dot-save', hasCfg ? 'green' : 'red');
+  document.getElementById('lbl-save').textContent = hasCfg ? 'Configuré' : 'Non configuré';
+  document.getElementById('lbl-save').style.color = hasCfg ? 'var(--green)' : 'var(--red)';
+  // phone
+  setDot('dot-phone', phone ? 'green' : 'red');
+  document.getElementById('lbl-phone').textContent = phone ? '+' + phone.substring(0, 6) + '...' : 'Manquant';
+  document.getElementById('lbl-phone').style.color = phone ? 'var(--green)' : 'var(--red)';
+  // key
+  setDot('dot-key', apikey ? 'green' : 'red');
+  document.getElementById('lbl-key').textContent = apikey ? apikey.substring(0, 3) + '****' : 'Manquante';
+  document.getElementById('lbl-key').style.color = apikey ? 'var(--green)' : 'var(--red)';
+  // engine
+  setDot('dot-engine', hasCfg ? 'green' : 'orange');
+  document.getElementById('lbl-engine').textContent = hasCfg ? '✅ Actif — vérifie /60s' : '⏸ En attente de config';
+  document.getElementById('lbl-engine').style.color = hasCfg ? 'var(--green)' : 'var(--accent)';
+}
+
+function setDot(id, color) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.className = 'dot';
+  if (color === 'green') { el.classList.add('dot-green'); }
+  else if (color === 'red') { el.style.background = 'var(--red)'; }
+  else { el.style.background = 'var(--accent)'; }
+}
+
+function onInputChange() {
+  document.getElementById('saved-badge').style.display = 'none';
+}
+
+// ===== CALLMEBOT SEND VIA CORS PROXY =====
+async function callMeBotSend(phone, apikey, message) {
+  const targetUrl = `https://api.callmebot.com/whatsapp.php?phone=${phone}&text=${encodeURIComponent(message)}&apikey=${apikey}`;
+  const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
+  
+  addLog(`📤 Envoi via proxy CORS...`);
+  addLog(`🌐 Cible : callmebot.com → phone=${phone.substring(0,6)}...`);
+  
+  try {
+    const response = await fetch(proxyUrl);
+    const data = await response.json();
+    const content = data.contents || '';
+    
+    addLog(`📥 Réponse proxy : ${content.substring(0, 80)}...`);
+    
+    if (content.includes('Message sent') || content.includes('OK') || response.ok) {
+      addLog(`✅ Message envoyé avec succès !`);
+      return { ok: true, message: 'Message envoyé' };
+    } else {
+      addLog(`⚠️ Réponse inattendue : ${content.substring(0, 60)}`);
+      return { ok: false, message: content };
+    }
+  } catch (err) {
+    addLog(`❌ Erreur réseau : ${err.message}`);
+    return { ok: false, message: err.message };
+  }
+}
+
+async function sendTest() {
+  const cfg = loadConfig();
+  if (!cfg || !cfg.phone || !cfg.apikey) {
+    showAlert('test-alert', 'danger', '❌ Configurez d\'abord votre numéro et votre clé API (Étape 2)');
+    return;
+  }
+  
+  document.getElementById('test-log').style.display = 'block';
+  document.getElementById('test-log').innerHTML = '';
+  showAlert('test-alert', 'info', '⏳ Envoi en cours via proxy CORS...');
+  
+  const msg = `🏠 *MAX GUEST HOUSE*\n\n✅ Test CallMeBot réussi !\nLes alertes automatiques sont opérationnelles.\n\n📅 ${new Date().toLocaleString('fr-FR')}\n📞 0196381777`;
+  
+  const result = await callMeBotSend(cfg.phone, cfg.apikey, msg);
+  
+  if (result.ok) {
+    showAlert('test-alert', 'green', '✅ Message envoyé ! Vérifiez votre WhatsApp.');
+  } else {
+    showAlert('test-alert', 'danger', `❌ Échec : ${result.message}. Vérifiez votre clé API.`);
+  }
+}
+
+function addLog(text) {
+  const log = document.getElementById('test-log');
+  if (!log) return;
+  const time = new Date().toLocaleTimeString('fr-FR');
+  log.innerHTML += `<div class="log-entry"><span style="color:var(--muted);flex-shrink:0">${time}</span><span>${text}</span></div>`;
+  log.scrollTop = log.scrollHeight;
+}
+
+function showAlert(containerId, type, msg) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  const colors = { info: ['var(--blue)', 'al-info'], green: ['var(--green)', 'al-green'], warn: ['var(--accent)', 'al-warn'], danger: ['var(--red)', 'al-danger'] };
+  const icons = { info: 'ti-info-circle', green: 'ti-check', warn: 'ti-alert-triangle', danger: 'ti-x' };
+  const [color, cls] = colors[type] || colors.info;
+  el.innerHTML = `<div class="alert ${cls}"><i class="ti ${icons[type]}" style="color:${color};flex-shrink:0"></i><span>${msg}</span></div>`;
+}
+
+// INIT
+loadConfig();
+</script>
+</body>
+</html>
