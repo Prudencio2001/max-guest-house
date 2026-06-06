@@ -707,11 +707,11 @@ let depenses=[
   {id:4,date:'2025-03-10',aptId:6,type:'Peinture',desc:'Peinture complète',montant:50000,techId:null},
 ];
 
-// CallMeBot config — persisté en localStorage
-const CMB_KEY='mghouse_callmebot_cfg';
-function loadCmbCfg(){try{const r=localStorage.getItem(CMB_KEY);if(r){const c=JSON.parse(r);if(c.phone&&c.apikey)return{phone:c.phone,apikey:c.apikey,active:true};}}catch(e){}return{phone:'',apikey:'',active:false};}
-function saveCmbCfg(phone,apikey){try{localStorage.setItem(CMB_KEY,JSON.stringify({phone,apikey}));}catch(e){}}
-let cmbConfig=loadCmbCfg();
+// CallMeBot config — chargé depuis localStorage au démarrage
+const CMB_STORAGE_KEY="mghouse_callmebot_cfg";
+function loadCmbFromStorage(){try{const raw=localStorage.getItem(CMB_STORAGE_KEY);if(raw){const cfg=JSON.parse(raw);if(cfg.phone&&cfg.apikey)return{phone:cfg.phone,apikey:cfg.apikey,active:true};}}catch(e){}return{phone:"",apikey:"",active:false};}
+function saveCmbToStorage(phone,apikey){try{localStorage.setItem(CMB_STORAGE_KEY,JSON.stringify({phone,apikey,savedAt:new Date().toISOString()}));}catch(e){}}
+let cmbConfig=loadCmbFromStorage();
 // Alert triggers config — modifiable en temps réel
 let trigConfig={sbeeSeuil:5,canalSeuil:7,maintFreq:48,trigSbee:true,trigCanal7:true,trigCanal2:true,trigMaint:true};
 // Historique des alertes déjà envoyées (évite doublons)
@@ -727,29 +727,22 @@ apartments.forEach(a=>{
   propData[a.id]={zones:zonesNett.map(z=>({nom:z,fait:Math.random()>.35}))};
 });
 
-// ===== CALLMEBOT CORE — Multi-proxy CORS =====
+// ===== CALLMEBOT CORE =====
 async function callMeBotSend(phone,apikey,message){
   const encoded=encodeURIComponent(message);
   const target=`https://api.callmebot.com/whatsapp.php?phone=${phone}&text=${encoded}&apikey=${apikey}`;
-  const proxies=[
-    u=>`https://corsproxy.io/?${encodeURIComponent(u)}`,
-    u=>`https://api.allorigins.win/get?url=${encodeURIComponent(u)}`,
-    u=>`https://thingproxy.freeboard.io/fetch/${u}`,
-  ];
-  for(const mkProxy of proxies){
-    try{
-      const res=await fetch(mkProxy(target),{signal:AbortSignal.timeout(9000)});
-      if(!res.ok) continue;
-      let txt='';
-      try{const j=await res.json();txt=(j.contents||j.response||'').toLowerCase();}
-      catch{txt=(await res.text()).toLowerCase();}
-      // Succès si la réponse contient un indicateur positif ou est simplement reçue
-      if(txt.includes('message')||txt.includes('ok')||txt.includes('sent')||txt.includes('queue')||txt.length>0){
-        return{ok:true,raw:txt};
-      }
-    }catch(e){continue;}
+  // Proxy CORS gratuit pour contourner le blocage navigateur (Netlify inclus)
+  const proxyUrl=`https://api.allorigins.win/get?url=${encodeURIComponent(target)}`;
+  try{
+    const r=await fetch(proxyUrl);
+    const data=await r.json();
+    const content=(data.contents||'').toLowerCase();
+    // CallMeBot renvoie "message queued" ou "ok" en cas de succès
+    const ok=content.includes('message queued')||content.includes('ok')||content.includes('message sent')||r.ok;
+    return{ok,content:data.contents||''};
+  }catch(e){
+    return{ok:false,content:e.message};
   }
-  return{ok:false,raw:'Tous les proxies CORS inaccessibles'};
 }
 
 function buildMsg(type,aptId){
@@ -882,13 +875,13 @@ async function testCallMeBot(){
   const key=document.getElementById('cmb-apikey').value.trim();
   const res_el=document.getElementById('cmb-test-result');
   if(!phone||!key){res_el.innerHTML='<div class="alert al-danger"><i class="ti ti-alert-circle" style="color:var(--red)"></i>Entrez le numéro et la clé API</div>';return;}
-  res_el.innerHTML='<div class="alert al-info"><i class="ti ti-loader" style="color:var(--blue)"></i>Envoi via proxy CORS en cours...</div>';
-  const msg=`🏠 *MAX GUEST HOUSE*\n\n✅ Test CallMeBot !\nSi vous recevez ce message, les alertes automatiques fonctionnent.\n\n📅 ${new Date().toLocaleString('fr-FR')}`;
+  res_el.innerHTML='<div class="alert al-info"><i class="ti ti-loader" style="color:var(--blue)"></i>Envoi en cours via proxy CORS...</div>';
+  const msg=`🏠 *MAX GUEST HOUSE*\n\n✅ Test CallMeBot !\nSi vous recevez ce message, les alertes automatiques sont opérationnelles.\n\n📅 ${new Date().toLocaleString('fr-FR')}`;
   const r=await callMeBotSend(phone,key,msg);
   if(r.ok){
-    res_el.innerHTML='<div class="alert al-green"><i class="ti ti-check" style="color:var(--green)"></i>✅ Envoyé ! Vérifiez votre WhatsApp dans quelques secondes.</div>';
-  }else{
-    res_el.innerHTML=`<div class="alert al-danger"><i class="ti ti-x" style="color:var(--red)"></i>❌ Échec : ${r.raw}. Vérifiez votre connexion et clé API.</div>`;
+    res_el.innerHTML='<div class="alert al-green"><i class="ti ti-check" style="color:var(--green)"></i>✅ Message envoyé avec succès ! Vérifiez votre WhatsApp.</div>';
+  } else {
+    res_el.innerHTML=`<div class="alert al-danger"><i class="ti ti-x" style="color:var(--red)"></i>❌ Échec : ${r.content.substring(0,120)}. Vérifiez votre clé API.</div>`;
   }
 }
 
@@ -896,15 +889,15 @@ function saveCallMeBotConfig(){
   const phone=document.getElementById('cmb-phone').value.replace(/\D/g,'').trim();
   const key=document.getElementById('cmb-apikey').value.trim();
   if(!phone){alert('Entrez votre numéro WhatsApp (chiffres uniquement)');return;}
-  if(!key){alert('Entrez la clé API CallMeBot');return;}
+  if(!key){alert('Entrez la clé API reçue de CallMeBot');return;}
   cmbConfig={phone,apikey:key,active:true};
-  saveCmbCfg(phone,key);
-  document.getElementById('cmb-phone').value=phone;
+  saveCmbToStorage(phone,key); // Persistance localStorage
+  document.getElementById('cmb-phone').value=phone; // Affiche le numéro nettoyé
   const hint=document.getElementById('cmb-save-hint');
-  if(hint)hint.style.display='none';
+  if(hint) hint.style.display='none';
   updateCmbStatusUI();
-  nextCheckIn=5;
-  alert('✅ Sauvegardé !\nCallMeBot actif. Alertes automatiques dans 5s.\nConfig mémorisée pour les prochaines visites.');
+  nextCheckIn=5; // Vérification immédiate dans 5s
+  alert('✅ Configuration sauvegardée !\nCallMeBot est actif. Les alertes automatiques démarrent dans 5 secondes.\nConfiguration mémorisée pour les prochaines visites.');
 }
 
 function updateCmbStatusUI(){
